@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$repo = "https://github.com/TUUSUARIO/universal-software-launcher/archive/refs/heads/main.zip"
+$repo = "https://github.com/fjesusdel/universal-software-launcher/archive/refs/heads/main.zip"
 $temp = Join-Path $env:TEMP "universal-launcher"
 
 Write-Host "[*] Descargando launcher..."
@@ -16,3 +16,4 @@ Set-Location "$temp\universal-software-launcher-main"
 
 Set-ExecutionPolicy Bypass -Scope Process -Force
 .\launcher.ps1
+
