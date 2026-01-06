@@ -1,9 +1,8 @@
 # ==================================================
 # BOOTSTRAP BLACK CONSOLE
-# Se encarga de:
-#  - Auto-elevacion a admin
-#  - Descarga del repositorio
-#  - Ejecucion del launcher
+# - Solicita permisos de administrador
+# - Descarga el repositorio
+# - Ejecuta el launcher
 # ==================================================
 
 $ErrorActionPreference = "Stop"
@@ -19,8 +18,8 @@ if (-not $IsAdmin) {
     Write-Host "[!] Se requieren permisos de administrador. Solicitando UAC..."
 
     Start-Process powershell `
-        -ArgumentList "-ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/fjesusdel/universal-software-launcher/main/bootstrap.ps1 | iex`"" `
-        -Verb RunAs
+        -Verb RunAs `
+        -ArgumentList "-ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/fjesusdel/universal-software-launcher/main/bootstrap.ps1 | iex`""
 
     exit
 }
@@ -47,9 +46,9 @@ Expand-Archive -Path $ZipPath -DestinationPath $BaseDir -Force
 $LauncherPath = Join-Path $BaseDir "universal-software-launcher-main"
 
 # ------------------------------
-# EJECUTAR LAUNCHER (ADMIN)
+# EJECUTAR LAUNCHER (SIN -NoExit)
 # ------------------------------
 Set-Location $LauncherPath
 Set-ExecutionPolicy Bypass -Scope Process -Force
 
-powershell -ExecutionPolicy Bypass -NoExit -File ".\launcher.ps1"
+powershell -ExecutionPolicy Bypass -File ".\launcher.ps1"
