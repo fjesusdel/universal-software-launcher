@@ -1,115 +1,101 @@
+# ==================================================
+# PREPARE NEW PC - BLACK CONSOLE (FASE 2)
+# ==================================================
+
 function Prepare-NewPC {
 
     Clear-Host
-
-    $Installed = @()
-    $Failed    = @()
-    $Removed   = @()
-
-    Write-Host "Prepare New PC (Recommended)" -ForegroundColor Cyan
-    Write-Host "----------------------------------------------"
+    Write-Host "Prepare New PC" -ForegroundColor Cyan
+    Write-Host "--------------"
     Write-Host ""
 
-    Write-VerboseInfo "Mostrando resumen previo al usuario"
-
-    Write-Host "Se va a preparar el equipo con las siguientes acciones:"
-    Write-Host ""
-
-    Write-Host "SOFTWARE QUE SE INSTALARA:"
-    @(
-        "Google Chrome",
-        "WinRAR",
-        "Discord",
-        "Microsoft Visual C++ Redistributables",
-        ".NET Desktop Runtime"
-    ) | ForEach-Object { Write-Host " - $_" }
-
-    Write-Host ""
-    Write-Host "CARPETAS QUE SE CREARAN:"
-    Write-Host " - C:\BlackConsole"
-
-    Write-Host ""
-    Write-Host "APLICACIONES QUE SE DESINSTALARAN:"
-    $bloatware = @(
-        "Microsoft.XboxApp",
-        "Microsoft.XboxGamingOverlay",
-        "Microsoft.XboxGameOverlay",
-        "Microsoft.XboxSpeechToTextOverlay",
-        "Microsoft.549981C3F5F10",
-        "Microsoft.Clipchamp",
-        "Microsoft.MicrosoftSolitaireCollection",
-        "Microsoft.BingWeather",
-        "Microsoft.BingNews",
-        "Microsoft.GetHelp",
-        "Microsoft.Getstarted",
-        "Microsoft.People",
-        "Microsoft.SkypeApp",
-        "Microsoft.MixedReality.Portal",
-        "Microsoft.WindowsMaps"
-    )
-    $bloatware | ForEach-Object { Write-Host " - $_" }
-
-    Write-Host ""
-    $confirm = Read-Host "¿Desea continuar con la preparacion del sistema? (S/N)"
-    if ($confirm.ToUpper() -ne "S") {
-        Write-Host "Operacion cancelada por el usuario." -ForegroundColor Yellow
+    if (-not (Run-Prechecks)) {
         return
     }
 
-    Write-VerboseInfo "Usuario confirmo la ejecucion"
+    Write-Host "Seleccione un preset:"
+    Write-Host " [1] Basico"
+    Write-Host " [2] Gaming"
+    Write-Host " [3] Trabajo"
+    Write-Host " [0] Cancelar"
+    Write-Host ""
 
-    if (-not (Test-Path "C:\BlackConsole")) {
-        Write-VerboseInfo "Creando carpeta C:\BlackConsole"
-        New-Item -ItemType Directory -Path "C:\BlackConsole" | Out-Null
+    $choice = Read-Host "Opcion"
+    if ($choice -eq "0") { return }
+
+    $presets = Get-PreparePresets
+    if (-not $presets.ContainsKey($choice)) {
+        Write-Host "Opcion invalida" -ForegroundColor Red
+        Start-Sleep 1
+        return
     }
 
-    $steps = @(
-        @{ Name = "Google Chrome"; Action = { Install-Chrome } },
-        @{ Name = "WinRAR"; Action = { Install-WinRAR } },
-        @{ Name = "Discord"; Action = { Install-Discord } },
-        @{ Name = "Visual C++ Redistributables"; Action = { Install-VCRedist } },
-        @{ Name = ".NET Desktop Runtime"; Action = { Install-DotNetDesktop } }
-    )
+    $preset = $presets[$choice]
 
-    foreach ($step in $steps) {
+    Clear-Host
+    Write-Host "Preset seleccionado: $($preset.Name)" -ForegroundColor Cyan
+    Write-Host ""
+
+    Write-Host "Se instalaran:"
+    $preset.Install | ForEach-Object { Write-Host " - $_" }
+
+    Write-Host ""
+    Write-Host "Se eliminaran apps no esenciales."
+    Write-Host ""
+
+    $confirm = Read-Host "¿Desea continuar? (S/N)"
+    if ($confirm.ToUpper() -ne "S") {
+        Write-Host "Operacion cancelada."
+        return
+    }
+
+    Write-Host ""
+    Write-Host "Guardando snapshot inicial..."
+    $before = Save-SystemSnapshot "before"
+
+    $installed = @()
+    $skipped   = @()
+    $failed    = @()
+
+    foreach ($app in $preset.Install) {
         try {
-            Write-VerboseInfo "Ejecutando instalador: $($step.Name)"
-            & $step.Action
-            $Installed += $step.Name
+            switch ($app) {
+                "Chrome"  { Install-Chrome }
+                "WinRAR"  { Install-WinRAR }
+                "Firefox" { Install-Firefox }
+                "7Zip"    { Install-7Zip }
+                "Steam"   { Install-Steam }
+                "Nvidia"  { Install-NvidiaApp }
+                "Office"  { Install-Office2024 }
+            }
+            $installed += $app
         } catch {
-            $Failed += $step.Name
+            $failed += $app
         }
     }
 
     Write-Host ""
-    Write-Host "Eliminando aplicaciones no esenciales..." -ForegroundColor Cyan
+    Write-Host "Guardando snapshot final..."
+    $after = Save-SystemSnapshot "after"
 
-    foreach ($app in $bloatware) {
-        try {
-            Write-VerboseInfo "Procesando app UWP: $app"
-            $pkg = Get-AppxPackage -Name $app -AllUsers -ErrorAction SilentlyContinue
-            if ($pkg) {
-                $pkg | Remove-AppxPackage -ErrorAction SilentlyContinue
-                $Removed += $app
-            }
-        } catch {}
-    }
-
-    Start-Process "ms-settings:defaultapps"
-
-    Write-Host ""
-    Write-Host "Resumen de la preparacion del sistema" -ForegroundColor Cyan
+    Clear-Host
+    Write-Host "Resumen final" -ForegroundColor Cyan
+    Write-Host "-------------"
     Write-Host ""
 
-    $Installed | ForEach-Object { Write-Host " - $_" }
-    Write-Host ""
-    Write-Host "Aplicaciones eliminadas: $($Removed.Count)"
-    if ($Failed.Count -gt 0) {
+    Write-Host "Instalado correctamente:"
+    $installed | ForEach-Object { Write-Host " - $_" }
+
+    if ($failed.Count -gt 0) {
         Write-Host ""
-        Write-Host "Acciones con errores:" -ForegroundColor Yellow
-        $Failed | ForEach-Object { Write-Host " - $_" }
+        Write-Host "Errores:" -ForegroundColor Yellow
+        $failed | ForEach-Object { Write-Host " - $_" }
     }
 
     Write-Host ""
-    Write-Host "Preparacion finalizada." -ForegroundColor Green
+    Write-Host "Black Console ha dejado el sistema listo." -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Snapshots guardados en:"
+    Write-Host " $before"
+    Write-Host " $after"
 }
