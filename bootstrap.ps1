@@ -1,22 +1,55 @@
+# ==================================================
+# BOOTSTRAP BLACK CONSOLE
+# Se encarga de:
+#  - Auto-elevacion a admin
+#  - Descarga del repositorio
+#  - Ejecucion del launcher
+# ==================================================
+
 $ErrorActionPreference = "Stop"
 
-$repoUrl = "https://github.com/fjesusdel/universal-software-launcher/archive/refs/heads/main.zip"
-$baseDir = Join-Path $env:TEMP "universal-launcher"
-$zipPath = "$baseDir.zip"
+# ------------------------------
+# COMPROBAR ADMIN
+# ------------------------------
+$IsAdmin = ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()
+).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
-Write-Host "[*] Descargando launcher..."
+if (-not $IsAdmin) {
+    Write-Host "[!] Se requieren permisos de administrador. Solicitando UAC..."
 
-Invoke-WebRequest -Uri $repoUrl -OutFile $zipPath
+    Start-Process powershell `
+        -ArgumentList "-ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/fjesusdel/universal-software-launcher/main/bootstrap.ps1 | iex`"" `
+        -Verb RunAs
 
-if (-not (Test-Path $baseDir)) {
-    New-Item -ItemType Directory -Path $baseDir | Out-Null
+    exit
 }
 
-Expand-Archive -Path $zipPath -DestinationPath $baseDir -Force
+# ------------------------------
+# DESCARGA DEL REPO
+# ------------------------------
+$RepoUrl = "https://github.com/fjesusdel/universal-software-launcher/archive/refs/heads/main.zip"
+$BaseDir = Join-Path $env:TEMP "universal-launcher"
+$ZipPath = "$BaseDir.zip"
 
-$launcherPath = Join-Path $baseDir "universal-software-launcher-main"
+Write-Host "[*] Descargando Black Console..."
 
-Set-Location $launcherPath
+if (Test-Path $BaseDir) {
+    Remove-Item $BaseDir -Recurse -Force
+}
+if (Test-Path $ZipPath) {
+    Remove-Item $ZipPath -Force
+}
+
+Invoke-WebRequest -Uri $RepoUrl -OutFile $ZipPath
+Expand-Archive -Path $ZipPath -DestinationPath $BaseDir -Force
+
+$LauncherPath = Join-Path $BaseDir "universal-software-launcher-main"
+
+# ------------------------------
+# EJECUTAR LAUNCHER (ADMIN)
+# ------------------------------
+Set-Location $LauncherPath
 Set-ExecutionPolicy Bypass -Scope Process -Force
 
-.\launcher.ps1
+powershell -ExecutionPolicy Bypass -NoExit -File ".\launcher.ps1"

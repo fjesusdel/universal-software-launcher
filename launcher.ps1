@@ -3,27 +3,17 @@ param (
 )
 
 # ==================================================
-# AUTO-ELEVACIÓN A ADMINISTRADOR
+# FORZAR UTF-8
 # ==================================================
-$IsAdmin = ([Security.Principal.WindowsPrincipal] `
-    [Security.Principal.WindowsIdentity]::GetCurrent()
-).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-
-if (-not $IsAdmin) {
-    Write-Host "[!] Se requieren permisos de administrador. Reabriendo..." -ForegroundColor Yellow
-
-    Start-Process powershell `
-        -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" `
-        -Verb RunAs
-
-    exit
-}
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+chcp 65001 | Out-Null
 
 # ==================================================
-# CONFIGURACIÓN INICIAL
+# CONFIGURACION INICIAL
 # ==================================================
 Clear-Host
 $ErrorActionPreference = "Stop"
+$Host.UI.RawUI.WindowTitle = "Black Console"
 
 $BasePath = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -42,7 +32,7 @@ if (-not (Test-Path $LogDir)) {
 Start-Transcript -Path "$LogDir\launcher.log" -Append
 
 # ==================================================
-# LISTA DE MÓDULOS
+# MODULOS
 # ==================================================
 $AllModules = @(
     "office2024.ps1",
@@ -57,18 +47,18 @@ function Install-All {
     foreach ($mod in $AllModules) {
         $i++
         Write-Progress `
-            -Activity "Instalación masiva" `
+            -Activity "Instalacion masiva" `
             -Status "Instalando $mod" `
             -PercentComplete (($i / $AllModules.Count) * 100)
 
         . "$BasePath\modules\$mod"
     }
 
-    Write-Progress -Activity "Instalación masiva" -Completed
+    Write-Progress -Activity "Instalacion masiva" -Completed
 }
 
 # ==================================================
-# EJECUCIÓN AUTOMÁTICA
+# EJECUCION
 # ==================================================
 Show-Banner
 
@@ -78,12 +68,9 @@ if ($Auto) {
     exit
 }
 
-# ==================================================
-# MENÚ INTERACTIVO
-# ==================================================
 do {
     Show-Menu
-    $opt = Read-Host "Seleccione una opción"
+    $opt = Read-Host "Seleccione una opcion"
 
     switch ($opt) {
         "1" { . "$BasePath\modules\office2024.ps1" }
@@ -94,7 +81,7 @@ do {
         "6" { Install-All }
         "7" { Show-Installed }
         "0" { break }
-        default { Write-Host "Opción inválida" -ForegroundColor Red }
+        default { Write-Host "Opcion invalida" -ForegroundColor Red }
     }
 
     Pause
