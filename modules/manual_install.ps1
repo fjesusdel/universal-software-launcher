@@ -28,12 +28,15 @@ function Install-WhatsApp {
     }
 
     Write-Info "Instalando WhatsApp Desktop..."
+    Write-Host "Nota: WhatsApp requiere instalacion interactiva." -ForegroundColor DarkGray
 
     $url = "https://web.whatsapp.com/desktop/windows/release/x64/WhatsAppSetup.exe"
     $installer = "$env:TEMP\whatsapp_installer.exe"
 
     Download-File $url $installer
-    Start-Process $installer -ArgumentList "/S" -Wait
+
+    # IMPORTANTE: WhatsApp NO admite instalacion silenciosa
+    Start-Process $installer -Wait
 
     Write-Ok "WhatsApp Desktop instalado."
 }
@@ -92,25 +95,4 @@ function Install-NvidiaApp {
     $installer = "$env:TEMP\nvidia_app.exe"
 
     Download-File $url $installer
-    Start-Process $installer -ArgumentList "/S" -Wait
-
-    Write-Ok "NVIDIA App instalada."
-}
-
-function Install-UltimakerCura {
-
-    if (Is-ProgramInstalled "Ultimaker Cura") {
-        Write-Skip "Ultimaker Cura ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando Ultimaker Cura..."
-
-    $url = "https://github.com/Ultimaker/Cura/releases/latest/download/Ultimaker-Cura-Windows-X64.exe"
-    $installer = "$env:TEMP\cura_installer.exe"
-
-    Download-File $url $installer
-    Start-Process $installer -ArgumentList "/S" -Wait
-
-    Write-Ok "Ultimaker Cura instalado."
-}
+    Start-Process $installer -Argu
