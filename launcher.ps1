@@ -12,12 +12,36 @@ chcp 65001 | Out-Null
 $ErrorActionPreference = "Stop"
 $Host.UI.RawUI.WindowTitle = "Black Console"
 
+# --------------------------------------------------
+# AJUSTE DE TAMANO DE VENTANA (IMPORTANTE)
+# --------------------------------------------------
+try {
+    $rawUI = $Host.UI.RawUI
+
+    # Buffer primero
+    $bufferSize = $rawUI.BufferSize
+    $bufferSize.Width  = 120
+    $bufferSize.Height = 300
+    $rawUI.BufferSize = $bufferSize
+
+    # Ventana despues
+    $windowSize = $rawUI.WindowSize
+    $windowSize.Width  = 100
+    $windowSize.Height = 35
+    $rawUI.WindowSize = $windowSize
+}
+catch {
+    # Si falla (PowerShell antiguo, permisos, etc.), no rompemos nada
+}
+
+# --------------------------------------------------
+# RUTA BASE
+# --------------------------------------------------
 $BasePath = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# ==================================================
+# --------------------------------------------------
 # CARGA SEGURA DE MODULOS
-# ==================================================
-
+# --------------------------------------------------
 $modules = @(
     "$BasePath\lib\config.ps1",
     "$BasePath\lib\ui.ps1",
@@ -46,28 +70,25 @@ foreach ($module in $modules) {
     }
 }
 
-# ==================================================
+# --------------------------------------------------
 # MODO VERBOSE
-# ==================================================
-
+# --------------------------------------------------
 if ($Verbose) {
     $Global:BlackConsole.Verbose = $true
 }
 
-# ==================================================
+# --------------------------------------------------
 # FUNCIONES DE UI
-# ==================================================
-
+# --------------------------------------------------
 function Show-MainScreen {
     Clear-Host
     Show-Banner
     Show-Signature
 }
 
-# ==================================================
+# --------------------------------------------------
 # ARRANQUE
-# ==================================================
-
+# --------------------------------------------------
 Show-MainScreen
 
 while ($true) {
@@ -101,9 +122,6 @@ while ($true) {
         }
     }
 
-    # ==================================================
-    # RETORNO CONTROLADO AL MENU
-    # ==================================================
     Write-Host ""
     Write-Host "Pulse cualquier tecla para volver al menu..." -ForegroundColor DarkGray
     [void][System.Console]::ReadKey($true)
