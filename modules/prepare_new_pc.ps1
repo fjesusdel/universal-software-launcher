@@ -36,37 +36,59 @@ function Prepare-NewPC {
     Write-Host "Preset seleccionado: $($preset.Name)" -ForegroundColor Cyan
     Write-Host ""
 
-    Write-Host "Se instalaran:"
-    $preset.Install | ForEach-Object { Write-Host " - $_" }
+    # -------------------------------
+    # MOSTRAR INSTALACIONES
+    # -------------------------------
+    Write-Host "SOFTWARE QUE SE INSTALARA:"
+    $preset.Install | ForEach-Object {
+        Write-Host " - $_"
+    }
 
     Write-Host ""
-    Write-Host "Se eliminaran apps no esenciales."
+
+    # -------------------------------
+    # MOSTRAR DESINSTALACIONES
+    # -------------------------------
+    Write-Host "APLICACIONES QUE SE DESINSTALARAN:"
+    $preset.Remove | ForEach-Object {
+        Write-Host " - $_"
+    }
+
+    Write-Host ""
+    Write-Host "No se eliminaran aplicaciones criticas del sistema."
     Write-Host ""
 
     $confirm = Read-Host "¿Desea continuar? (S/N)"
     if ($confirm.ToUpper() -ne "S") {
-        Write-Host "Operacion cancelada."
+        Write-Host "Operacion cancelada por el usuario."
+        Start-Sleep 1
         return
     }
 
+    # -------------------------------
+    # SNAPSHOT INICIAL
+    # -------------------------------
     Write-Host ""
     Write-Host "Guardando snapshot inicial..."
     $before = Save-SystemSnapshot "before"
 
     $installed = @()
-    $skipped   = @()
     $failed    = @()
+    $removed   = @()
 
+    # -------------------------------
+    # INSTALACIONES
+    # -------------------------------
     foreach ($app in $preset.Install) {
         try {
             switch ($app) {
-                "Chrome"  { Install-Chrome }
-                "WinRAR"  { Install-WinRAR }
-                "Firefox" { Install-Firefox }
-                "7Zip"    { Install-7Zip }
-                "Steam"   { Install-Steam }
-                "Nvidia"  { Install-NvidiaApp }
-                "Office"  { Install-Office2024 }
+                "Google Chrome"   { Install-Chrome }
+                "WinRAR"          { Install-WinRAR }
+                "Mozilla Firefox" { Install-Firefox }
+                "7-Zip"           { Install-7Zip }
+                "Steam"           { Install-Steam }
+                "NVIDIA App"      { Install-NvidiaApp }
+                "Microsoft Office"{ Install-Office2024 }
             }
             $installed += $app
         } catch {
@@ -74,10 +96,29 @@ function Prepare-NewPC {
         }
     }
 
+    # -------------------------------
+    # DESINSTALACION DE BLOATWARE
+    # -------------------------------
+    foreach ($pkg in $preset.Remove) {
+        try {
+            Get-AppxPackage -Name $pkg -AllUsers -ErrorAction SilentlyContinue |
+                Remove-AppxPackage -ErrorAction SilentlyContinue
+            $removed += $pkg
+        } catch {
+            # no critico
+        }
+    }
+
+    # -------------------------------
+    # SNAPSHOT FINAL
+    # -------------------------------
     Write-Host ""
     Write-Host "Guardando snapshot final..."
     $after = Save-SystemSnapshot "after"
 
+    # -------------------------------
+    # RESUMEN FINAL
+    # -------------------------------
     Clear-Host
     Write-Host "Resumen final" -ForegroundColor Cyan
     Write-Host "-------------"
@@ -86,9 +127,15 @@ function Prepare-NewPC {
     Write-Host "Instalado correctamente:"
     $installed | ForEach-Object { Write-Host " - $_" }
 
+    if ($removed.Count -gt 0) {
+        Write-Host ""
+        Write-Host "Aplicaciones eliminadas:"
+        $removed | ForEach-Object { Write-Host " - $_" }
+    }
+
     if ($failed.Count -gt 0) {
         Write-Host ""
-        Write-Host "Errores:" -ForegroundColor Yellow
+        Write-Host "Errores durante el proceso:" -ForegroundColor Yellow
         $failed | ForEach-Object { Write-Host " - $_" }
     }
 
