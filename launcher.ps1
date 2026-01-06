@@ -1,8 +1,12 @@
-# ================================
+param (
+    [switch]$Auto
+)
+
+# ==================================================
 # AUTO-ELEVACIÓN A ADMINISTRADOR
-# ================================
+# ==================================================
 $IsAdmin = ([Security.Principal.WindowsPrincipal] `
-    [Security.Principal.WindowsIdentity]::GetCurrent() `
+    [Security.Principal.WindowsIdentity]::GetCurrent()
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if (-not $IsAdmin) {
@@ -15,20 +19,31 @@ if (-not $IsAdmin) {
     exit
 }
 
-param (
-    [switch]$Auto
-)
-
+# ==================================================
+# CONFIGURACIÓN INICIAL
+# ==================================================
 Clear-Host
 $ErrorActionPreference = "Stop"
+
 $BasePath = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-Import-Module "$BasePath/lib/ui.ps1"
-Import-Module "$BasePath/lib/installer.ps1"
-Import-Module "$BasePath/lib/detector.ps1"
+Import-Module "$BasePath\lib\ui.ps1"
+Import-Module "$BasePath\lib\installer.ps1"
+Import-Module "$BasePath\lib\detector.ps1"
 
-Start-Transcript -Path "$BasePath/logs/launcher.log" -Append
+# ==================================================
+# LOGS
+# ==================================================
+$LogDir = "$BasePath\logs"
+if (-not (Test-Path $LogDir)) {
+    New-Item -ItemType Directory -Path $LogDir | Out-Null
+}
 
+Start-Transcript -Path "$LogDir\launcher.log" -Append
+
+# ==================================================
+# LISTA DE MÓDULOS
+# ==================================================
 $AllModules = @(
     "office2024.ps1",
     "chrome.ps1",
@@ -46,11 +61,15 @@ function Install-All {
             -Status "Instalando $mod" `
             -PercentComplete (($i / $AllModules.Count) * 100)
 
-        . "$BasePath/modules/$mod"
+        . "$BasePath\modules\$mod"
     }
+
     Write-Progress -Activity "Instalación masiva" -Completed
 }
 
+# ==================================================
+# EJECUCIÓN AUTOMÁTICA
+# ==================================================
 Show-Banner
 
 if ($Auto) {
@@ -59,16 +78,19 @@ if ($Auto) {
     exit
 }
 
+# ==================================================
+# MENÚ INTERACTIVO
+# ==================================================
 do {
     Show-Menu
     $opt = Read-Host "Seleccione una opción"
 
     switch ($opt) {
-        "1" { . "$BasePath/modules/office2024.ps1" }
-        "2" { . "$BasePath/modules/chrome.ps1" }
-        "3" { . "$BasePath/modules/winrar.ps1" }
-        "4" { . "$BasePath/modules/virtualbox.ps1" }
-        "5" { . "$BasePath/modules/discord.ps1" }
+        "1" { . "$BasePath\modules\office2024.ps1" }
+        "2" { . "$BasePath\modules\chrome.ps1" }
+        "3" { . "$BasePath\modules\winrar.ps1" }
+        "4" { . "$BasePath\modules\virtualbox.ps1" }
+        "5" { . "$BasePath\modules\discord.ps1" }
         "6" { Install-All }
         "7" { Show-Installed }
         "0" { break }
@@ -78,6 +100,7 @@ do {
     Pause
     Clear-Host
     Show-Banner
-} while ($true)
+}
+while ($true)
 
 Stop-Transcript
