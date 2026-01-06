@@ -34,7 +34,7 @@ try {
 @"
 @echo off
 title Black Console
-mode con cols=120 lines=40
+mode con cols=140 lines=70
 powershell -NoExit -ExecutionPolicy Bypass -File `"$($launcher.FullName)`"
 "@ | Set-Content $cmd -Encoding ASCII
 
