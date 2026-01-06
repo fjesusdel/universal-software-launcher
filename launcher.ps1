@@ -2,9 +2,10 @@ param (
     [switch]$Verbose
 )
 
-# ----------------------------------------------
-# CONFIGURACION INICIAL
-# ----------------------------------------------
+# ==================================================
+# BLACK CONSOLE - LAUNCHER PRINCIPAL
+# ==================================================
+
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 chcp 65001 | Out-Null
 
@@ -13,9 +14,10 @@ $Host.UI.RawUI.WindowTitle = "Black Console"
 
 $BasePath = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# ----------------------------------------------
+# ==================================================
 # CARGA SEGURA DE MODULOS
-# ----------------------------------------------
+# ==================================================
+
 $modules = @(
     "$BasePath\lib\config.ps1",
     "$BasePath\lib\ui.ps1",
@@ -44,25 +46,28 @@ foreach ($module in $modules) {
     }
 }
 
-# ----------------------------------------------
+# ==================================================
 # MODO VERBOSE
-# ----------------------------------------------
+# ==================================================
+
 if ($Verbose) {
     $Global:BlackConsole.Verbose = $true
 }
 
-# ----------------------------------------------
+# ==================================================
 # FUNCIONES DE UI
-# ----------------------------------------------
+# ==================================================
+
 function Show-MainScreen {
     Clear-Host
     Show-Banner
     Show-Signature
 }
 
-# ----------------------------------------------
+# ==================================================
 # ARRANQUE
-# ----------------------------------------------
+# ==================================================
+
 Show-MainScreen
 
 while ($true) {
@@ -72,20 +77,8 @@ while ($true) {
 
     switch ($opt.ToUpper()) {
 
-        # ------------------------------------------
-        # OPCION 1 - PREPARE NEW PC
-        # ------------------------------------------
-        "1" {
-            Prepare-NewPC
-            Write-Host ""
-            Write-Host "Pulse cualquier tecla para volver al menu..." -ForegroundColor DarkGray
-            [void][System.Console]::ReadKey($true)
-            Show-MainScreen
-        }
+        "1" { Prepare-NewPC }
 
-        # ------------------------------------------
-        # INSTALACION MANUAL
-        # ------------------------------------------
         "6" { Install-Steam }
         "7" { Install-WhatsApp }
         "8" { Install-Firefox }
@@ -93,25 +86,10 @@ while ($true) {
         "10" { Install-NvidiaApp }
         "11" { Install-UltimakerCura }
 
-        # ------------------------------------------
-        # DIAGNOSTICO
-        # ------------------------------------------
-        "D" {
-            Show-SystemDiagnostic
-            Show-MainScreen
-        }
+        "D" { Show-SystemDiagnostic }
 
-        # ------------------------------------------
-        # ACERCA DE
-        # ------------------------------------------
-        "A" {
-            Show-About
-            Show-MainScreen
-        }
+        "A" { Show-About }
 
-        # ------------------------------------------
-        # SALIR
-        # ------------------------------------------
         "0" {
             Write-Host ""
             Write-Host "Saliendo de Black Console..." -ForegroundColor Cyan
@@ -121,7 +99,14 @@ while ($true) {
         default {
             Write-Host "Opcion invalida" -ForegroundColor Red
             Start-Sleep -Seconds 1
-            Show-MainScreen
         }
     }
+
+    # ==================================================
+    # RETORNO CONTROLADO AL MENU
+    # ==================================================
+    Write-Host ""
+    Write-Host "Pulse cualquier tecla para volver al menu..." -ForegroundColor DarkGray
+    [void][System.Console]::ReadKey($true)
+    Show-MainScreen
 }
