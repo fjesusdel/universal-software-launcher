@@ -6,24 +6,35 @@ function Install-Exe {
         [string]$Args
     )
 
+    # Comprobación previa
     if (Is-Installed $Check) {
         Write-Host "[SKIP] $Name ya está instalado`n" -ForegroundColor Yellow
         return
     }
 
+    # Ruta temporal del instalador
     $Tmp = "$env:TEMP\$($Name.Replace(' ','_')).exe"
 
     Write-Host "[*] Descargando $Name..."
-    Invoke-WebRequest $Url -OutFile $Tmp
+    Invoke-WebRequest -Uri $Url -OutFile $Tmp
 
     Write-Host "[*] Instalando $Name..."
-    Start-Process $Tmp -ArgumentList $Args -Wait -NoNewWindow
 
-    Write-Host "[OK] $Name instalado`n" -ForegroundColor Green
+    # IMPORTANTE: solo pasar ArgumentList si existe
+    if ([string]::IsNullOrWhiteSpace($Args)) {
+        Start-Process -FilePath $Tmp -Wait -NoNewWindow
+    }
+    else {
+        Start-Process -FilePath $Tmp -ArgumentList $Args -Wait -NoNewWindow
+    }
+
+    Write-Host "[OK] $Name instalado correctamente`n" -ForegroundColor Green
 }
 
 function Install-Office2024 {
-    param ([string]$Xml)
+    param (
+        [string]$Xml
+    )
 
     if (Is-Installed "Office") {
         Write-Host "[SKIP] Office ya instalado`n" -ForegroundColor Yellow
@@ -31,13 +42,21 @@ function Install-Office2024 {
     }
 
     $Dir = "$env:TEMP\Office2024"
-    New-Item $Dir -ItemType Directory -Force | Out-Null
 
-    Invoke-WebRequest "https://www.microsoft.com/fwlink/?linkid=2156295" `
+    if (-not (Test-Path $Dir)) {
+        New-Item -ItemType Directory -Path $Dir | Out-Null
+    }
+
+    Write-Host "[*] Descargando Office Deployment Tool..."
+    Invoke-WebRequest `
+        -Uri "https://www.microsoft.com/fwlink/?linkid=2156295" `
         -OutFile "$Dir\odt.exe"
 
+    Write-Host "[*] Extrayendo ODT..."
     Start-Process "$Dir\odt.exe" "/quiet /extract:$Dir" -Wait
+
+    Write-Host "[*] Instalando Office 2024..."
     Start-Process "$Dir\setup.exe" "/configure `"$Xml`"" -Wait
 
-    Write-Host "[OK] Office 2024 instalado`n" -ForegroundColor Green
+    Write-Host "[OK] Office 2024 instalado correctamente`n" -ForegroundColor Green
 }
