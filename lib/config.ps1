@@ -5,7 +5,7 @@
 $Global:BlackConsole = @{
     Name    = "Black Console"
     Author  = "Fran Delgado"
-    Version = "1.5.0"
+    Version = "1.6.0"
     Verbose = $false
 }
 
