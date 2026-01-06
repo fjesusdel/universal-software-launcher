@@ -24,10 +24,8 @@ function Show-Signature {
     Write-Host "Version: $($Global:BlackConsole.Version)"
     Write-Host ""
 
-    # Elegir UNA sola frase
     $phrase = Get-Random -InputObject $Global:StartupPhrases
     Write-Host $phrase
-
     Write-Host ""
 }
 
@@ -46,10 +44,10 @@ function Show-Menu {
 
     Write-Host "APLICACIONES AVANZADAS"
     Write-Host " [6] Steam"
-    Write-Host " [8] Mozilla Firefox"
-    Write-Host " [9] 7-Zip"
-    Write-Host " [10] NVIDIA App"
-    Write-Host " [11] Ultimaker Cura"
+    Write-Host " [7] Mozilla Firefox"
+    Write-Host " [8] 7-Zip"
+    Write-Host " [9] NVIDIA App"
+    Write-Host " [10] Ultimaker Cura"
     Write-Host ""
 
     Write-Host "OTRAS OPCIONES"
