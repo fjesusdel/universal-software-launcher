@@ -9,11 +9,12 @@ $Global:BlackConsole = @{
     Verbose = $false
 }
 
-# Frases de inicio (personalidad)
+# Frases de inicio (identidad Black Console)
 $Global:StartupPhrases = @(
-    "Preparando el sistema...",
-    "Automatizando tareas repetitivas.",
+    "Inicializando entorno Black Console...",
+    "Automatizando tareas comunes.",
     "Menos clics. Mas control.",
-    "Configurando un entorno limpio.",
-    "Preparando Windows para su primer uso."
+    "Preparando el sistema de forma controlada.",
+    "Optimizando el punto de partida.",
+    "Centralizando la configuracion inicial."
 )

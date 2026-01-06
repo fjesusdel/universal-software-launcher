@@ -75,5 +75,6 @@ function Show-About {
     Write-Host " sistema listo para su uso manteniendo el"
     Write-Host " control en manos del usuario."
     Write-Host ""
-    Pause
+    Write-Host "Pulse cualquier tecla para volver al menu..." -ForegroundColor DarkGray
+    Read-Host | Out-Null
 }

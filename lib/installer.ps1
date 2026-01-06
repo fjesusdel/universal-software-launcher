@@ -1,62 +1,170 @@
-function Install-Exe {
-    param (
-        [string]$Name,
-        [string]$Check,
-        [string]$Url,
-        [string]$Args
-    )
+# ==================================================
+# INSTALLER - BLACK CONSOLE
+# ==================================================
 
-    # Comprobación previa
-    if (Is-Installed $Check) {
-        Write-Host "[SKIP] $Name ya está instalado`n" -ForegroundColor Yellow
-        return
-    }
+# -------------------------------
+# SALIDA CONTROLADA
+# -------------------------------
 
-    # Ruta temporal del instalador
-    $Tmp = "$env:TEMP\$($Name.Replace(' ','_')).exe"
-
-    Write-Host "[*] Descargando $Name..."
-    Invoke-WebRequest -Uri $Url -OutFile $Tmp
-
-    Write-Host "[*] Instalando $Name..."
-
-    # IMPORTANTE: solo pasar ArgumentList si existe
-    if ([string]::IsNullOrWhiteSpace($Args)) {
-        Start-Process -FilePath $Tmp -Wait -NoNewWindow
-    }
-    else {
-        Start-Process -FilePath $Tmp -ArgumentList $Args -Wait -NoNewWindow
-    }
-
-    Write-Host "[OK] $Name instalado correctamente`n" -ForegroundColor Green
+function Write-Info {
+    param ([string]$Message)
+    Write-Host $Message -ForegroundColor Cyan
 }
 
-function Install-Office2024 {
+function Write-Skip {
+    param ([string]$Message)
+    Write-Host $Message -ForegroundColor Yellow
+}
+
+function Write-Ok {
+    param ([string]$Message)
+    Write-Host $Message -ForegroundColor Green
+}
+
+function Write-VerboseInfo {
+    param ([string]$Message)
+    if ($Global:BlackConsole.Verbose) {
+        Write-Host "[VERBOSE] $Message" -ForegroundColor DarkGray
+    }
+}
+
+# -------------------------------
+# UTILIDADES
+# -------------------------------
+
+function Download-File {
     param (
-        [string]$Xml
+        [string]$Url,
+        [string]$OutFile
     )
 
-    if (Is-Installed "Office") {
-        Write-Host "[SKIP] Office ya instalado`n" -ForegroundColor Yellow
+    Write-VerboseInfo "Descargando desde: $Url"
+    Write-VerboseInfo "Destino: $OutFile"
+
+    Invoke-WebRequest -Uri $Url -OutFile $OutFile -UseBasicParsing
+}
+
+function Is-ProgramInstalled {
+    param ([string]$Name)
+
+    Write-VerboseInfo "Comprobando si esta instalado: $Name"
+
+    $paths = @(
+        "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
+        "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+    )
+
+    foreach ($path in $paths) {
+        if (Test-Path $path) {
+            $items = Get-ChildItem $path -ErrorAction SilentlyContinue |
+                Get-ItemProperty -ErrorAction SilentlyContinue |
+                Where-Object { $_.DisplayName -and $_.DisplayName -like "*$Name*" }
+
+            if ($items) {
+                Write-VerboseInfo "Detectado en registro: $Name"
+                return $true
+            }
+        }
+    }
+
+    return $false
+}
+
+# ==================================================
+# INSTALADORES
+# ==================================================
+
+function Install-Chrome {
+
+    if (Is-ProgramInstalled "Google Chrome") {
+        Write-Skip "Google Chrome ya esta instalado."
         return
     }
 
-    $Dir = "$env:TEMP\Office2024"
+    Write-Info "Instalando Google Chrome..."
 
-    if (-not (Test-Path $Dir)) {
-        New-Item -ItemType Directory -Path $Dir | Out-Null
+    $url = "https://www.google.com/chrome/install/enterprise?platform=win&standalone=1"
+    $installer = "$env:TEMP\chrome_installer.exe"
+
+    Download-File $url $installer
+    Start-Process $installer -ArgumentList "/silent /install" -Wait
+
+    Write-Ok "Google Chrome instalado."
+}
+
+function Install-WinRAR {
+
+    if (Is-ProgramInstalled "WinRAR") {
+        Write-Skip "WinRAR ya esta instalado."
+        return
     }
 
-    Write-Host "[*] Descargando Office Deployment Tool..."
-    Invoke-WebRequest `
-        -Uri "https://www.microsoft.com/fwlink/?linkid=2156295" `
-        -OutFile "$Dir\odt.exe"
+    Write-Info "Instalando WinRAR..."
 
-    Write-Host "[*] Extrayendo ODT..."
-    Start-Process "$Dir\odt.exe" "/quiet /extract:$Dir" -Wait
+    $url = "https://www.rarlab.com/rar/winrar-x64-701.exe"
+    $installer = "$env:TEMP\winrar_installer.exe"
 
-    Write-Host "[*] Instalando Office 2024..."
-    Start-Process "$Dir\setup.exe" "/configure `"$Xml`"" -Wait
+    Download-File $url $installer
+    Start-Process $installer -ArgumentList "/S" -Wait
 
-    Write-Host "[OK] Office 2024 instalado correctamente`n" -ForegroundColor Green
+    Write-Ok "WinRAR instalado."
+}
+
+function Install-Discord {
+
+    Write-VerboseInfo "Comprobando ruta local de Discord"
+
+    if (Test-Path "$env:LOCALAPPDATA\Discord") {
+        Write-Skip "Discord ya esta instalado."
+        return
+    }
+
+    Write-Info "Instalando Discord..."
+
+    $url = "https://discord.com/api/download?platform=win"
+    $installer = "$env:TEMP\discord_installer.exe"
+
+    Download-File $url $installer
+    Start-Process $installer -ArgumentList "/S" -Wait
+
+    Write-Ok "Discord instalado."
+}
+
+function Install-VCRedist {
+
+    Write-Info "Instalando Microsoft Visual C++ Redistributables..."
+
+    $packages = @(
+        @{ Name = "VC++ x64"; Url = "https://aka.ms/vs/17/release/vc_redist.x64.exe" },
+        @{ Name = "VC++ x86"; Url = "https://aka.ms/vs/17/release/vc_redist.x86.exe" }
+    )
+
+    foreach ($pkg in $packages) {
+        Write-VerboseInfo "Procesando paquete: $($pkg.Name)"
+
+        $installer = "$env:TEMP\$($pkg.Name.Replace(' ', '_')).exe"
+        Download-File $pkg.Url $installer
+        Start-Process $installer -ArgumentList "/quiet /norestart" -Wait
+    }
+
+    Write-Ok "Visual C++ Redistributables instalados."
+}
+
+function Install-DotNetDesktop {
+
+    if (Is-ProgramInstalled ".NET Desktop Runtime") {
+        Write-Skip ".NET Desktop Runtime ya esta instalado."
+        return
+    }
+
+    Write-Info "Instalando .NET Desktop Runtime..."
+
+    $url = "https://dotnet.microsoft.com/download/dotnet/thank-you/runtime-desktop-8.0.0-windows-x64-installer"
+    $installer = "$env:TEMP\dotnet_desktop.exe"
+
+    Download-File $url $installer
+    Start-Process $installer -ArgumentList "/install /quiet /norestart" -Wait
+
+    Write-Ok ".NET Desktop Runtime instalado."
 }

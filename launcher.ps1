@@ -14,6 +14,7 @@ Import-Module "$BasePath\lib\config.ps1"
 Import-Module "$BasePath\lib\ui.ps1"
 Import-Module "$BasePath\lib\installer.ps1"
 Import-Module "$BasePath\lib\detector.ps1"
+Import-Module "$BasePath\modules\prepare_new_pc.ps1"
 
 if ($Verbose) {
     $Global:BlackConsole.Verbose = $true
@@ -27,12 +28,20 @@ do {
     $opt = Read-Host "Seleccione una opcion"
 
     switch ($opt.ToUpper()) {
-        "1" { Write-Host "Prepare New PC aun no ejecutado (en desarrollo)" -ForegroundColor Yellow }
-        "A" { Show-About }
+
+        "1" {
+            Prepare-NewPC
+        }
+
+        "A" {
+            Show-About
+        }
+
         "0" {
             Write-Host "`nSaliendo de Black Console..." -ForegroundColor Cyan
             exit
         }
+
         default {
             Write-Host "Opcion invalida" -ForegroundColor Red
         }
