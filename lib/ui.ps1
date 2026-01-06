@@ -2,19 +2,18 @@ function Show-Banner {
 
     Clear-Host
 
-    Write-Host "######################################################################" -ForegroundColor DarkGray
-    Write-Host "#                                                                    #" -ForegroundColor DarkGray
-    Write-Host "#   ██████╗ ██╗      █████╗  ██████╗██╗  ██╗                         #" -ForegroundColor Cyan
-    Write-Host "#   ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝                         #" -ForegroundColor Cyan
-    Write-Host "#   ██████╔╝██║     ███████║██║     █████╔╝                          #" -ForegroundColor Cyan
-    Write-Host "#   ██╔══██╗██║     ██╔══██║██║     ██╔═██╗                          #" -ForegroundColor Cyan
-    Write-Host "#   ██████╔╝███████╗██║  ██║╚██████╗██║  ██╗                         #" -ForegroundColor Cyan
-    Write-Host "#   ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝                         #" -ForegroundColor Cyan
-    Write-Host "#                                                                    #" -ForegroundColor DarkGray
-    Write-Host "#                        BLACK CONSOLE                                #" -ForegroundColor White
-    Write-Host "#                  Universal Software Launcher                         #" -ForegroundColor DarkGray
-    Write-Host "#                                                                    #" -ForegroundColor DarkGray
-    Write-Host "######################################################################" -ForegroundColor DarkGray
+    Write-Host "============================================================" -ForegroundColor DarkGray
+    Write-Host "||                                                        ||" -ForegroundColor DarkGray
+    Write-Host "||   ____  _            _      ____                      ||" -ForegroundColor Cyan
+    Write-Host "||  | __ )| | __ _  ___| | __ / ___| ___  _ __            ||" -ForegroundColor Cyan
+    Write-Host "||  |  _ \| |/ _` |/ __| |/ /| |    / _ \| '_ \           ||" -ForegroundColor Cyan
+    Write-Host "||  | |_) | | (_| | (__|   < | |___| (_) | | | |          ||" -ForegroundColor Cyan
+    Write-Host "||  |____/|_|\__,_|\___|_|\_\ \____|\___/|_| |_|          ||" -ForegroundColor Cyan
+    Write-Host "||                                                        ||" -ForegroundColor DarkGray
+    Write-Host "||                    BLACK CONSOLE                       ||" -ForegroundColor White
+    Write-Host "||              Universal Software Launcher               ||" -ForegroundColor DarkGray
+    Write-Host "||                                                        ||" -ForegroundColor DarkGray
+    Write-Host "============================================================" -ForegroundColor DarkGray
     Write-Host ""
 }
 
