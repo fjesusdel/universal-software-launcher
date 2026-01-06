@@ -20,35 +20,6 @@ function Install-Steam {
     Write-Ok "Steam instalado."
 }
 
-function Install-WhatsApp {
-
-    if (Is-ProgramInstalled "WhatsApp") {
-        Write-Skip "WhatsApp Desktop ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando WhatsApp Desktop..."
-    Write-Host ""
-    Write-Host "WhatsApp requiere instalacion interactiva." -ForegroundColor Yellow
-    Write-Host "El instalador se abrira y Black Console se cerrara." -ForegroundColor DarkGray
-    Write-Host ""
-
-    $url = "https://web.whatsapp.com/desktop/windows/release/x64/WhatsAppSetup.exe"
-    $installer = "$env:TEMP\whatsapp_installer.exe"
-
-    Download-File $url $installer
-
-    # IMPORTANTE:
-    # WhatsApp finaliza el proceso padre cuando se ejecuta desde iex.
-    # Por ello NO usamos -Wait y cerramos Black Console de forma controlada.
-    Start-Process $installer
-
-    Write-Host ""
-    Write-Host "Instalador lanzado. Puede cerrar esta ventana." -ForegroundColor Green
-    Start-Sleep -Seconds 2
-    exit
-}
-
 function Install-Firefox {
 
     if (Is-ProgramInstalled "Mozilla Firefox") {

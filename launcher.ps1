@@ -80,7 +80,6 @@ while ($true) {
         "1" { Prepare-NewPC }
 
         "6" { Install-Steam }
-        "7" { Install-WhatsApp }
         "8" { Install-Firefox }
         "9" { Install-7Zip }
         "10" { Install-NvidiaApp }
