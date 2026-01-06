@@ -1,54 +1,43 @@
 # ==================================================
-# BOOTSTRAP BLACK CONSOLE
-# - Solicita permisos de administrador
-# - Descarga el repositorio
-# - Ejecuta el launcher
+# BLACK CONSOLE - BOOTSTRAP
 # ==================================================
 
 $ErrorActionPreference = "Stop"
 
-# ------------------------------
-# COMPROBAR ADMIN
-# ------------------------------
-$IsAdmin = ([Security.Principal.WindowsPrincipal] `
-    [Security.Principal.WindowsIdentity]::GetCurrent()
-).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+try {
 
-if (-not $IsAdmin) {
-    Write-Host "[!] Se requieren permisos de administrador. Solicitando UAC..."
+    Write-Host "[*] Descargando Black Console..." -ForegroundColor Cyan
 
-    Start-Process powershell `
-        -Verb RunAs `
-        -ArgumentList "-ExecutionPolicy Bypass -Command `"irm https://raw.githubusercontent.com/fjesusdel/universal-software-launcher/main/bootstrap.ps1 | iex`""
+    $temp = "$env:TEMP\blackconsole"
+    if (Test-Path $temp) {
+        Remove-Item $temp -Recurse -Force
+    }
 
-    exit
+    $zip = "$temp.zip"
+    $repo = "https://github.com/fjesusdel/universal-software-launcher/archive/refs/heads/main.zip"
+
+    Invoke-WebRequest $repo -OutFile $zip -UseBasicParsing
+    Expand-Archive $zip -DestinationPath $temp -Force
+
+    $launcher = Get-ChildItem $temp -Recurse -Filter "launcher.ps1" | Select-Object -First 1
+
+    if (-not $launcher) {
+        throw "No se pudo localizar launcher.ps1"
+    }
+
+    Write-Host "[*] Iniciando Black Console..." -ForegroundColor Cyan
+    Write-Host ""
+
+    powershell -ExecutionPolicy Bypass -NoExit -File $launcher.FullName
+
 }
+catch {
 
-# ------------------------------
-# DESCARGA DEL REPO
-# ------------------------------
-$RepoUrl = "https://github.com/fjesusdel/universal-software-launcher/archive/refs/heads/main.zip"
-$BaseDir = Join-Path $env:TEMP "universal-launcher"
-$ZipPath = "$BaseDir.zip"
-
-Write-Host "[*] Descargando Black Console..."
-
-if (Test-Path $BaseDir) {
-    Remove-Item $BaseDir -Recurse -Force
+    Write-Host ""
+    Write-Host "ERROR CRITICO EN BOOTSTRAP" -ForegroundColor Red
+    Write-Host ""
+    Write-Host $_.Exception.Message -ForegroundColor DarkRed
+    Write-Host ""
+    Write-Host "Pulse cualquier tecla para cerrar..." -ForegroundColor DarkGray
+    [void][System.Console]::ReadKey($true)
 }
-if (Test-Path $ZipPath) {
-    Remove-Item $ZipPath -Force
-}
-
-Invoke-WebRequest -Uri $RepoUrl -OutFile $ZipPath
-Expand-Archive -Path $ZipPath -DestinationPath $BaseDir -Force
-
-$LauncherPath = Join-Path $BaseDir "universal-software-launcher-main"
-
-# ------------------------------
-# EJECUTAR LAUNCHER (SIN -NoExit)
-# ------------------------------
-Set-Location $LauncherPath
-Set-ExecutionPolicy Bypass -Scope Process -Force
-
-powershell -ExecutionPolicy Bypass -File ".\launcher.ps1"
