@@ -1,53 +1,53 @@
 # ==================================================
-# BLACK CONSOLE - BOOTSTRAP (CONHOST)
+# BLACK CONSOLE - BOOTSTRAP DEFINITIVO
 # ==================================================
 
 $ErrorActionPreference = "Stop"
 
-# Si estamos en Windows Terminal, relanzar en conhost
-if ($env:WT_SESSION) {
-
-    Write-Host "[*] Lanzando Black Console en consola clasica..." -ForegroundColor Cyan
-
-    powershell.exe -NoExit -ExecutionPolicy Bypass -Command `
-        "irm https://raw.githubusercontent.com/fjesusdel/universal-software-launcher/main/bootstrap.ps1 | iex"
-
-    exit
-}
-
 try {
 
-    Write-Host "[*] Descargando Black Console..." -ForegroundColor Cyan
+    Write-Host "[*] Preparando Black Console..." -ForegroundColor Cyan
 
-    $temp = "$env:TEMP\blackconsole"
-    if (Test-Path $temp) {
-        Remove-Item $temp -Recurse -Force
+    $base = "$env:TEMP\BlackConsole"
+    if (Test-Path $base) {
+        Remove-Item $base -Recurse -Force
     }
 
-    $zip = "$temp.zip"
+    New-Item -ItemType Directory -Path $base | Out-Null
+
+    $zip = "$base\repo.zip"
     $repo = "https://github.com/fjesusdel/universal-software-launcher/archive/refs/heads/main.zip"
 
     Invoke-WebRequest $repo -OutFile $zip -UseBasicParsing
-    Expand-Archive $zip -DestinationPath $temp -Force
+    Expand-Archive $zip -DestinationPath $base -Force
 
-    $launcher = Get-ChildItem $temp -Recurse -Filter "launcher.ps1" | Select-Object -First 1
+    $launcher = Get-ChildItem $base -Recurse -Filter "launcher.ps1" | Select-Object -First 1
     if (-not $launcher) {
-        throw "No se pudo localizar launcher.ps1"
+        throw "launcher.ps1 no encontrado"
     }
 
-    Write-Host "[*] Iniciando Black Console..." -ForegroundColor Cyan
-    Write-Host ""
+    # Crear script lanzador local (CMD)
+    $cmd = "$base\run_blackconsole.cmd"
 
-    powershell.exe -NoExit -ExecutionPolicy Bypass -File $launcher.FullName
+    @"
+@echo off
+mode con cols=100 lines=35
+powershell -NoExit -ExecutionPolicy Bypass -File `"$($launcher.FullName)`"
+"@ | Set-Content $cmd -Encoding ASCII
+
+    Write-Host "[*] Solicitando permisos de administrador..." -ForegroundColor Yellow
+
+    Start-Process -FilePath "cmd.exe" `
+        -ArgumentList "/c `"$cmd`"" `
+        -Verb RunAs
 
 }
 catch {
 
     Write-Host ""
     Write-Host "ERROR CRITICO EN BOOTSTRAP" -ForegroundColor Red
-    Write-Host ""
     Write-Host $_.Exception.Message -ForegroundColor DarkRed
     Write-Host ""
-    Write-Host "Pulse cualquier tecla para cerrar..." -ForegroundColor DarkGray
+    Write-Host "Pulse cualquier tecla para salir..." -ForegroundColor DarkGray
     [void][System.Console]::ReadKey($true)
 }
