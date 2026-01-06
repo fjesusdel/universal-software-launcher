@@ -26,12 +26,15 @@ try {
         throw "launcher.ps1 no encontrado"
     }
 
-    # Crear script lanzador local (CMD)
+    # --------------------------------------------------
+    # CREAR LANZADOR LOCAL (CMD CLASICO)
+    # --------------------------------------------------
     $cmd = "$base\run_blackconsole.cmd"
 
-    @"
+@"
 @echo off
-mode con cols=100 lines=35
+title Black Console
+mode con cols=120 lines=40
 powershell -NoExit -ExecutionPolicy Bypass -File `"$($launcher.FullName)`"
 "@ | Set-Content $cmd -Encoding ASCII
 
