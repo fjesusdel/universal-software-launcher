@@ -23,7 +23,11 @@ function Show-Signature {
     Write-Host "Autor: $($Global:BlackConsole.Author)"
     Write-Host "Version: $($Global:BlackConsole.Version)"
     Write-Host ""
-    Write-Host $Global:StartupPhrases | Get-Random
+
+    # Elegir UNA sola frase
+    $phrase = Get-Random -InputObject $Global:StartupPhrases
+    Write-Host $phrase
+
     Write-Host ""
 }
 
