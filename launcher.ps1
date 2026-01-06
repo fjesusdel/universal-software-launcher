@@ -1,7 +1,10 @@
-param ([switch]$Verbose)
+param (
+    [switch]$Verbose
+)
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 chcp 65001 | Out-Null
+
 $ErrorActionPreference = "Stop"
 $Host.UI.RawUI.WindowTitle = "Black Console"
 
@@ -17,10 +20,30 @@ $modules = @(
     "$BasePath\modules\snapshot.ps1",
     "$BasePath\modules\presets.ps1",
     "$BasePath\modules\prepare_new_pc.ps1",
-    "$BasePath\modules\system_diagnostic.ps1"
+    "$BasePath\modules\system_diagnostic.ps1",
+    "$BasePath\modules\about.ps1"
 )
 
-foreach ($m in $modules) { Import-Module $m -ErrorAction Stop }
+foreach ($module in $modules) {
+    try {
+        Import-Module $module -ErrorAction Stop
+    } catch {
+        Clear-Host
+        Write-Host "ERROR CRITICO AL INICIAR BLACK CONSOLE" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "No se pudo cargar el modulo:"
+        Write-Host " $module" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host $_.Exception.Message -ForegroundColor DarkRed
+        Write-Host ""
+        Read-Host "Pulse ENTER para salir"
+        exit 1
+    }
+}
+
+if ($Verbose) {
+    $Global:BlackConsole.Verbose = $true
+}
 
 function Show-MainScreen {
     Clear-Host
@@ -31,26 +54,41 @@ function Show-MainScreen {
 Show-MainScreen
 
 while ($true) {
+
     Show-Menu
     $opt = Read-Host "Seleccione una opcion"
 
     switch ($opt.ToUpper()) {
+
         "1" { Prepare-NewPC }
+
         "2" { Install-Chrome }
         "3" { Install-WinRAR }
         "4" { Install-Discord }
         "5" { Install-VirtualBox }
+
         "6" { Install-Steam }
         "7" { Install-Firefox }
         "8" { Install-7Zip }
         "9" { Install-NvidiaApp }
         "10" { Install-UltimakerCura }
+
         "A" { Show-About }
-        "0" { exit }
-        default { Write-Host "Opcion invalida"; Start-Sleep 1 }
+
+        "0" {
+            Write-Host ""
+            Write-Host "Saliendo de Black Console..." -ForegroundColor Cyan
+            exit
+        }
+
+        default {
+            Write-Host "Opcion invalida" -ForegroundColor Red
+            Start-Sleep -Seconds 1
+        }
     }
 
     Write-Host ""
-    Read-Host "Pulse ENTER para volver al menu"
+    Write-Host "Pulse cualquier tecla para volver al menu..." -ForegroundColor DarkGray
+    [void][System.Console]::ReadKey($true)
     Show-MainScreen
 }
