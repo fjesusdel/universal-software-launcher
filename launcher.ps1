@@ -80,8 +80,14 @@ do {
         "5" { . "$BasePath\modules\discord.ps1" }
         "6" { Install-All }
         "7" { Show-Installed }
-        "0" { break }
-        default { Write-Host "Opcion invalida" -ForegroundColor Red }
+        "0" {
+            Write-Host "`nSaliendo de Black Console..." -ForegroundColor Cyan
+            Stop-Transcript
+            exit
+        }
+        default {
+            Write-Host "Opcion invalida" -ForegroundColor Red
+        }
     }
 
     Pause
@@ -89,5 +95,3 @@ do {
     Show-Banner
 }
 while ($true)
-
-Stop-Transcript
