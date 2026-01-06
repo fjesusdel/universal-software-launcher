@@ -34,8 +34,6 @@ function Install-WhatsApp {
     $installer = "$env:TEMP\whatsapp_installer.exe"
 
     Download-File $url $installer
-
-    # IMPORTANTE: WhatsApp NO admite instalacion silenciosa
     Start-Process $installer -Wait
 
     Write-Ok "WhatsApp Desktop instalado."
@@ -79,8 +77,13 @@ function Install-7Zip {
 
 function Install-NvidiaApp {
 
+    if (-not (Get-Command Has-NvidiaGPU -ErrorAction SilentlyContinue)) {
+        Write-Skip "Deteccion NVIDIA no disponible. Omitiendo NVIDIA App."
+        return
+    }
+
     if (-not (Has-NvidiaGPU)) {
-        Write-Skip "No se ha detectado GPU NVIDIA. Omitiendo NVIDIA App."
+        Write-Skip "No se ha detectado GPU NVIDIA."
         return
     }
 
@@ -95,4 +98,25 @@ function Install-NvidiaApp {
     $installer = "$env:TEMP\nvidia_app.exe"
 
     Download-File $url $installer
-    Start-Process $installer -Argu
+    Start-Process $installer -ArgumentList "/S" -Wait
+
+    Write-Ok "NVIDIA App instalada."
+}
+
+function Install-UltimakerCura {
+
+    if (Is-ProgramInstalled "Ultimaker Cura") {
+        Write-Skip "Ultimaker Cura ya esta instalado."
+        return
+    }
+
+    Write-Info "Instalando Ultimaker Cura..."
+
+    $url = "https://github.com/Ultimaker/Cura/releases/latest/download/Ultimaker-Cura-Windows-X64.exe"
+    $installer = "$env:TEMP\cura_installer.exe"
+
+    Download-File $url $installer
+    Start-Process $installer -ArgumentList "/S" -Wait
+
+    Write-Ok "Ultimaker Cura instalado."
+}
