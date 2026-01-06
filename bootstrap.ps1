@@ -1,19 +1,22 @@
 $ErrorActionPreference = "Stop"
 
-$repo = "https://github.com/fjesusdel/universal-software-launcher/archive/refs/heads/main.zip"
-$temp = Join-Path $env:TEMP "universal-launcher"
+$repoUrl = "https://github.com/fjesusdel/universal-software-launcher/archive/refs/heads/main.zip"
+$baseDir = Join-Path $env:TEMP "universal-launcher"
+$zipPath = "$baseDir.zip"
 
 Write-Host "[*] Descargando launcher..."
-Invoke-WebRequest $repo -OutFile "$temp.zip"
 
-if (Test-Path $temp) {
-    Remove-Item $temp -Recurse -Force
+Invoke-WebRequest -Uri $repoUrl -OutFile $zipPath
+
+if (-not (Test-Path $baseDir)) {
+    New-Item -ItemType Directory -Path $baseDir | Out-Null
 }
 
-Expand-Archive "$temp.zip" $temp -Force
+Expand-Archive -Path $zipPath -DestinationPath $baseDir -Force
 
-Set-Location "$temp\universal-software-launcher-main"
+$launcherPath = Join-Path $baseDir "universal-software-launcher-main"
 
+Set-Location $launcherPath
 Set-ExecutionPolicy Bypass -Scope Process -Force
-.\launcher.ps1
 
+.\launcher.ps1
