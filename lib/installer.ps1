@@ -3,25 +3,60 @@
 # ==================================================
 
 # -------------------------------
-# UTILIDADES
+# DETECCION ROBUSTA
 # -------------------------------
 
-function Is-ProgramInstalled {
+function Test-RegistryProgram {
     param ([string]$Name)
 
     $paths = @(
         "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
-        "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+        "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
     )
 
     foreach ($path in $paths) {
-        if (Get-ItemProperty $path -ErrorAction SilentlyContinue |
-            Where-Object { $_.DisplayName -like "*$Name*" }) {
+        try {
+            if (Get-ItemProperty $path -ErrorAction SilentlyContinue |
+                Where-Object { $_.DisplayName -like "*$Name*" }) {
+                return $true
+            }
+        } catch {}
+    }
+    return $false
+}
+
+function Test-PathProgram {
+    param ([string[]]$Paths)
+
+    foreach ($p in $Paths) {
+        if (Test-Path $p) {
             return $true
         }
     }
     return $false
 }
+
+function Is-ProgramInstalled {
+    param (
+        [string]$Name,
+        [string[]]$Paths = @()
+    )
+
+    if (Test-RegistryProgram $Name) {
+        return $true
+    }
+
+    if ($Paths.Count -gt 0 -and (Test-PathProgram $Paths)) {
+        return $true
+    }
+
+    return $false
+}
+
+# -------------------------------
+# UTILIDADES
+# -------------------------------
 
 function Download-File {
     param (
@@ -38,12 +73,15 @@ function Write-Ok    { param($m) Write-Host "[OK] $m" -ForegroundColor Green }
 function Write-Skip  { param($m) Write-Host "[SKIP] $m" -ForegroundColor Yellow }
 
 # -------------------------------
-# INSTALADORES MANUALES BASE
+# INSTALADORES
 # -------------------------------
 
 function Install-Chrome {
 
-    if (Is-ProgramInstalled "Google Chrome") {
+    if (Is-ProgramInstalled "Google Chrome" @(
+        "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+        "$env:ProgramFiles(x86)\Google\Chrome\Application\chrome.exe"
+    )) {
         Write-Skip "Google Chrome ya esta instalado."
         return
     }
@@ -61,7 +99,10 @@ function Install-Chrome {
 
 function Install-WinRAR {
 
-    if (Is-ProgramInstalled "WinRAR") {
+    if (Is-ProgramInstalled "WinRAR" @(
+        "$env:ProgramFiles\WinRAR\WinRAR.exe",
+        "$env:ProgramFiles(x86)\WinRAR\WinRAR.exe"
+    )) {
         Write-Skip "WinRAR ya esta instalado."
         return
     }
@@ -79,7 +120,9 @@ function Install-WinRAR {
 
 function Install-Discord {
 
-    if (Is-ProgramInstalled "Discord") {
+    if (Is-ProgramInstalled "Discord" @(
+        "$env:LOCALAPPDATA\Discord\Update.exe"
+    )) {
         Write-Skip "Discord ya esta instalado."
         return
     }
@@ -97,7 +140,12 @@ function Install-Discord {
 
 function Install-VirtualBox {
 
-    if (Is-ProgramInstalled "Oracle VM VirtualBox") {
+    if (
+        Is-ProgramInstalled "Oracle VM VirtualBox" @(
+            "$env:ProgramFiles\Oracle\VirtualBox\VirtualBox.exe"
+        )
+        -or (Get-Service -Name "VBox*" -ErrorAction SilentlyContinue)
+    ) {
         Write-Skip "VirtualBox ya esta instalado."
         return
     }
