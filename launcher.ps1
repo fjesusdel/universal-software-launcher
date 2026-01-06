@@ -13,17 +13,22 @@ $BasePath = Split-Path -Parent $MyInvocation.MyCommand.Path
 Import-Module "$BasePath\lib\config.ps1"
 Import-Module "$BasePath\lib\ui.ps1"
 Import-Module "$BasePath\lib\installer.ps1"
-Import-Module "$BasePath\lib\detector.ps1"
 Import-Module "$BasePath\modules\prepare_new_pc.ps1"
 
 if ($Verbose) {
     $Global:BlackConsole.Verbose = $true
 }
 
-Show-Banner
-Show-Signature
+function Show-MainScreen {
+    Clear-Host
+    Show-Banner
+    Show-Signature
+}
 
-do {
+Show-MainScreen
+
+while ($true) {
+
     Show-Menu
     $opt = Read-Host "Seleccione una opcion"
 
@@ -31,24 +36,27 @@ do {
 
         "1" {
             Prepare-NewPC
+            Write-Host ""
+            Write-Host "Pulse cualquier tecla para volver al menu..." -ForegroundColor DarkGray
+            [void][System.Console]::ReadKey($true)
+            Show-MainScreen
         }
 
         "A" {
             Show-About
+            Show-MainScreen
         }
 
         "0" {
-            Write-Host "`nSaliendo de Black Console..." -ForegroundColor Cyan
+            Write-Host ""
+            Write-Host "Saliendo de Black Console..." -ForegroundColor Cyan
             exit
         }
 
         default {
             Write-Host "Opcion invalida" -ForegroundColor Red
+            Start-Sleep -Seconds 1
+            Show-MainScreen
         }
     }
-
-    Pause
-    Show-Banner
-    Show-Signature
 }
-while ($true)
