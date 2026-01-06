@@ -1,3 +1,20 @@
+# ================================
+# AUTO-ELEVACIÓN A ADMINISTRADOR
+# ================================
+$IsAdmin = ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent() `
+).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if (-not $IsAdmin) {
+    Write-Host "[!] Se requieren permisos de administrador. Reabriendo..." -ForegroundColor Yellow
+
+    Start-Process powershell `
+        -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" `
+        -Verb RunAs
+
+    exit
+}
+
 param (
     [switch]$Auto
 )
