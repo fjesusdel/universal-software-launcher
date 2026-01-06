@@ -1,8 +1,19 @@
 # ==================================================
-# BLACK CONSOLE - BOOTSTRAP
+# BLACK CONSOLE - BOOTSTRAP (CONHOST)
 # ==================================================
 
 $ErrorActionPreference = "Stop"
+
+# Si estamos en Windows Terminal, relanzar en conhost
+if ($env:WT_SESSION) {
+
+    Write-Host "[*] Lanzando Black Console en consola clasica..." -ForegroundColor Cyan
+
+    powershell.exe -NoExit -ExecutionPolicy Bypass -Command `
+        "irm https://raw.githubusercontent.com/fjesusdel/universal-software-launcher/main/bootstrap.ps1 | iex"
+
+    exit
+}
 
 try {
 
@@ -20,7 +31,6 @@ try {
     Expand-Archive $zip -DestinationPath $temp -Force
 
     $launcher = Get-ChildItem $temp -Recurse -Filter "launcher.ps1" | Select-Object -First 1
-
     if (-not $launcher) {
         throw "No se pudo localizar launcher.ps1"
     }
@@ -28,7 +38,7 @@ try {
     Write-Host "[*] Iniciando Black Console..." -ForegroundColor Cyan
     Write-Host ""
 
-    powershell -ExecutionPolicy Bypass -NoExit -File $launcher.FullName
+    powershell.exe -NoExit -ExecutionPolicy Bypass -File $launcher.FullName
 
 }
 catch {
