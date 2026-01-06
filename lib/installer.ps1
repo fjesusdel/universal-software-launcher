@@ -1,36 +1,27 @@
 # ==================================================
-# INSTALLER - BLACK CONSOLE
+# INSTALLER CORE - BLACK CONSOLE
 # ==================================================
-
-# -------------------------------
-# SALIDA CONTROLADA
-# -------------------------------
-
-function Write-Info {
-    param ([string]$Message)
-    Write-Host $Message -ForegroundColor Cyan
-}
-
-function Write-Skip {
-    param ([string]$Message)
-    Write-Host $Message -ForegroundColor Yellow
-}
-
-function Write-Ok {
-    param ([string]$Message)
-    Write-Host $Message -ForegroundColor Green
-}
-
-function Write-VerboseInfo {
-    param ([string]$Message)
-    if ($Global:BlackConsole.Verbose) {
-        Write-Host "[VERBOSE] $Message" -ForegroundColor DarkGray
-    }
-}
 
 # -------------------------------
 # UTILIDADES
 # -------------------------------
+
+function Is-ProgramInstalled {
+    param ([string]$Name)
+
+    $paths = @(
+        "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+    )
+
+    foreach ($path in $paths) {
+        if (Get-ItemProperty $path -ErrorAction SilentlyContinue |
+            Where-Object { $_.DisplayName -like "*$Name*" }) {
+            return $true
+        }
+    }
+    return $false
+}
 
 function Download-File {
     param (
@@ -38,42 +29,17 @@ function Download-File {
         [string]$OutFile
     )
 
-    Write-VerboseInfo "Descargando desde: $Url"
-    Write-VerboseInfo "Destino: $OutFile"
-
-    Invoke-WebRequest -Uri $Url -OutFile $OutFile -UseBasicParsing
+    Write-Host "[*] Descargando $Url"
+    Invoke-WebRequest $Url -OutFile $OutFile -UseBasicParsing
 }
 
-function Is-ProgramInstalled {
-    param ([string]$Name)
+function Write-Info  { param($m) Write-Host "[*] $m" -ForegroundColor Cyan }
+function Write-Ok    { param($m) Write-Host "[OK] $m" -ForegroundColor Green }
+function Write-Skip  { param($m) Write-Host "[SKIP] $m" -ForegroundColor Yellow }
 
-    Write-VerboseInfo "Comprobando si esta instalado: $Name"
-
-    $paths = @(
-        "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
-        "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-    )
-
-    foreach ($path in $paths) {
-        if (Test-Path $path) {
-            $items = Get-ChildItem $path -ErrorAction SilentlyContinue |
-                Get-ItemProperty -ErrorAction SilentlyContinue |
-                Where-Object { $_.DisplayName -and $_.DisplayName -like "*$Name*" }
-
-            if ($items) {
-                Write-VerboseInfo "Detectado en registro: $Name"
-                return $true
-            }
-        }
-    }
-
-    return $false
-}
-
-# ==================================================
-# INSTALADORES
-# ==================================================
+# -------------------------------
+# INSTALADORES MANUALES BASE
+# -------------------------------
 
 function Install-Chrome {
 
@@ -84,11 +50,11 @@ function Install-Chrome {
 
     Write-Info "Instalando Google Chrome..."
 
-    $url = "https://www.google.com/chrome/install/enterprise?platform=win&standalone=1"
-    $installer = "$env:TEMP\chrome_installer.exe"
+    $url = "https://www.google.com/chrome/?standalone=1"
+    $tmp = "$env:TEMP\chrome_installer.exe"
 
-    Download-File $url $installer
-    Start-Process $installer -ArgumentList "/silent /install" -Wait
+    Download-File $url $tmp
+    Start-Process $tmp -ArgumentList "/silent /install" -Wait
 
     Write-Ok "Google Chrome instalado."
 }
@@ -102,20 +68,18 @@ function Install-WinRAR {
 
     Write-Info "Instalando WinRAR..."
 
-    $url = "https://www.rarlab.com/rar/winrar-x64-701.exe"
-    $installer = "$env:TEMP\winrar_installer.exe"
+    $url = "https://www.rarlab.com/rar/winrar-x64-621.exe"
+    $tmp = "$env:TEMP\winrar_installer.exe"
 
-    Download-File $url $installer
-    Start-Process $installer -ArgumentList "/S" -Wait
+    Download-File $url $tmp
+    Start-Process $tmp -ArgumentList "/S" -Wait
 
     Write-Ok "WinRAR instalado."
 }
 
 function Install-Discord {
 
-    Write-VerboseInfo "Comprobando ruta local de Discord"
-
-    if (Test-Path "$env:LOCALAPPDATA\Discord") {
+    if (Is-ProgramInstalled "Discord") {
         Write-Skip "Discord ya esta instalado."
         return
     }
@@ -123,48 +87,28 @@ function Install-Discord {
     Write-Info "Instalando Discord..."
 
     $url = "https://discord.com/api/download?platform=win"
-    $installer = "$env:TEMP\discord_installer.exe"
+    $tmp = "$env:TEMP\discord_installer.exe"
 
-    Download-File $url $installer
-    Start-Process $installer -ArgumentList "/S" -Wait
+    Download-File $url $tmp
+    Start-Process $tmp -Wait
 
     Write-Ok "Discord instalado."
 }
 
-function Install-VCRedist {
+function Install-VirtualBox {
 
-    Write-Info "Instalando Microsoft Visual C++ Redistributables..."
-
-    $packages = @(
-        @{ Name = "VC++ x64"; Url = "https://aka.ms/vs/17/release/vc_redist.x64.exe" },
-        @{ Name = "VC++ x86"; Url = "https://aka.ms/vs/17/release/vc_redist.x86.exe" }
-    )
-
-    foreach ($pkg in $packages) {
-        Write-VerboseInfo "Procesando paquete: $($pkg.Name)"
-
-        $installer = "$env:TEMP\$($pkg.Name.Replace(' ', '_')).exe"
-        Download-File $pkg.Url $installer
-        Start-Process $installer -ArgumentList "/quiet /norestart" -Wait
-    }
-
-    Write-Ok "Visual C++ Redistributables instalados."
-}
-
-function Install-DotNetDesktop {
-
-    if (Is-ProgramInstalled ".NET Desktop Runtime") {
-        Write-Skip ".NET Desktop Runtime ya esta instalado."
+    if (Is-ProgramInstalled "Oracle VM VirtualBox") {
+        Write-Skip "VirtualBox ya esta instalado."
         return
     }
 
-    Write-Info "Instalando .NET Desktop Runtime..."
+    Write-Info "Instalando VirtualBox..."
 
-    $url = "https://dotnet.microsoft.com/download/dotnet/thank-you/runtime-desktop-8.0.0-windows-x64-installer"
-    $installer = "$env:TEMP\dotnet_desktop.exe"
+    $url = "https://download.virtualbox.org/virtualbox/7.1.4/VirtualBox-7.1.4-165100-Win.exe"
+    $tmp = "$env:TEMP\virtualbox_installer.exe"
 
-    Download-File $url $installer
-    Start-Process $installer -ArgumentList "/install /quiet /norestart" -Wait
+    Download-File $url $tmp
+    Start-Process $tmp -ArgumentList "--silent" -Wait
 
-    Write-Ok ".NET Desktop Runtime instalado."
+    Write-Ok "VirtualBox instalado."
 }
