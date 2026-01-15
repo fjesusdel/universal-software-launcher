@@ -1,8 +1,12 @@
-function Test-AppInstalledByName($Pattern) {
+function Test-AppInstalledByName {
+    param (
+        [string]$Pattern
+    )
 
     $Keys = @(
         "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
+        "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
     )
 
     foreach ($key in $Keys) {
@@ -13,11 +17,24 @@ function Test-AppInstalledByName($Pattern) {
             }
         }
     }
+
     return $false
 }
 
-function Test-SteamInstalled {
-    Test-AppInstalledByName "*Steam*"
+function Test-DiscordInstalled {
+
+    # Metodo 1: registro (por si existe)
+    if (Test-AppInstalledByName "*Discord*") {
+        return $true
+    }
+
+    # Metodo 2: instalacion por usuario (real)
+    $discordPath = Join-Path $env:LOCALAPPDATA "Discord\Update.exe"
+    if (Test-Path $discordPath) {
+        return $true
+    }
+
+    return $false
 }
 
 function Test-RadialInstalled {
@@ -28,6 +45,7 @@ function Test-VolumeInstalled {
     Test-Path "C:\BlackConsole\bin\volume.exe"
 }
 
-function Get-StatusLabel($Installed) {
+function Get-StatusLabel {
+    param ($Installed)
     if ($Installed) { "[INSTALADO]" } else { "[NO INSTALADO]" }
 }

@@ -14,7 +14,7 @@ function Show-UninstallMenu {
         # Deteccion de estado
         $chromeInstalled     = Test-AppInstalledByName "*Google Chrome*"
         $winrarInstalled     = Test-AppInstalledByName "*WinRAR*"
-        $discordInstalled    = Test-AppInstalledByName "*Discord*"
+        $discordInstalled    = Test-DiscordInstalled
         $virtualBoxInstalled = Test-AppInstalledByName "*VirtualBox*"
 
         $steamInstalled      = Test-AppInstalledByName "*Steam*"
