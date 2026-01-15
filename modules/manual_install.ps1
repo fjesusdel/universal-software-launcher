@@ -1,3 +1,11 @@
+# ==================================================
+# SUBMENU - INSTALAR SOFTWARE
+# ==================================================
+
+# Asegurar que las funciones Install-* estan disponibles
+$InstallerPath = Join-Path $PSScriptRoot "..\lib\installer.ps1"
+. $InstallerPath
+
 function Show-ManualInstallMenu {
 
     while ($true) {
