@@ -13,13 +13,15 @@ $BasePath = Split-Path -Parent $MyInvocation.MyCommand.Path
 $modules = @(
     "$BasePath\lib\config.ps1",
     "$BasePath\lib\ui.ps1",
+    "$BasePath\lib\detect.ps1",
     "$BasePath\lib\installer.ps1",
 
     "$BasePath\modules\hardware_detect.ps1",
     "$BasePath\modules\manual_install.ps1",
     "$BasePath\modules\batch_install.ps1",
-    "$BasePath\modules\uninstall\menu.ps1",
+
     "$BasePath\modules\uninstall\status.ps1",
+    "$BasePath\modules\uninstall\menu.ps1",
     "$BasePath\modules\uninstall\uninstall_windows_apps.ps1",
 
     "$BasePath\modules\prechecks.ps1",

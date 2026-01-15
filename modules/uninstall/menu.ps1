@@ -11,39 +11,24 @@ function Show-UninstallMenu {
         Write-Host "-----------------" -ForegroundColor Cyan
         Write-Host ""
 
-        # Deteccion de estado
-        $chromeInstalled     = Test-AppInstalledByName "*Google Chrome*"
-        $winrarInstalled     = Test-AppInstalledByName "*WinRAR*"
-        $discordInstalled    = Test-DiscordInstalled
-        $virtualBoxInstalled = Test-AppInstalledByName "*VirtualBox*"
-
-        $steamInstalled      = Test-AppInstalledByName "*Steam*"
-        $firefoxInstalled    = Test-AppInstalledByName "*Firefox*"
-        $zipInstalled        = Test-AppInstalledByName "*7-Zip*"
-        $nvidiaInstalled     = Test-AppInstalledByName "*NVIDIA App*"
-        $curaInstalled       = Test-AppInstalledByName "*Ultimaker Cura*"
-
-        $radialInstalled     = Test-RadialInstalled
-        $volumeInstalled     = Test-VolumeInstalled
-
         Write-Host "Aplicaciones:"
-        Write-Host " 1) Google Chrome $(Get-StatusLabel $chromeInstalled)"
-        Write-Host " 2) WinRAR $(Get-StatusLabel $winrarInstalled)"
-        Write-Host " 3) Discord $(Get-StatusLabel $discordInstalled)"
-        Write-Host " 4) VirtualBox $(Get-StatusLabel $virtualBoxInstalled)"
+        Write-Host " 1) Google Chrome $(Get-StatusLabel (Test-ChromeInstalled))"
+        Write-Host " 2) WinRAR $(Get-StatusLabel (Test-WinRARInstalled))"
+        Write-Host " 3) Discord $(Get-StatusLabel (Test-DiscordInstalled))"
+        Write-Host " 4) VirtualBox $(Get-StatusLabel (Test-VirtualBoxInstalled))"
         Write-Host ""
 
         Write-Host "Aplicaciones avanzadas:"
-        Write-Host " 5) Steam $(Get-StatusLabel $steamInstalled)"
-        Write-Host " 6) Mozilla Firefox $(Get-StatusLabel $firefoxInstalled)"
-        Write-Host " 7) 7-Zip $(Get-StatusLabel $zipInstalled)"
-        Write-Host " 8) NVIDIA App $(Get-StatusLabel $nvidiaInstalled)"
-        Write-Host " 9) Ultimaker Cura $(Get-StatusLabel $curaInstalled)"
+        Write-Host " 5) Steam $(Get-StatusLabel (Test-SteamInstalled))"
+        Write-Host " 6) Mozilla Firefox $(Get-StatusLabel (Test-FirefoxInstalled))"
+        Write-Host " 7) 7-Zip $(Get-StatusLabel (Test-7ZipInstalled))"
+        Write-Host " 8) NVIDIA App $(Get-StatusLabel (Test-NvidiaAppInstalled))"
+        Write-Host " 9) Ultimaker Cura $(Get-StatusLabel (Test-UltimakerCuraInstalled))"
         Write-Host ""
 
         Write-Host "Herramientas Black Console:"
-        Write-Host " R) Black Console Radial HUD $(Get-StatusLabel $radialInstalled)"
-        Write-Host " V) Control de volumen rapido $(Get-StatusLabel $volumeInstalled)"
+        Write-Host " R) Black Console Radial HUD $(Get-StatusLabel (Test-RadialInstalled))"
+        Write-Host " V) Control de volumen rapido $(Get-StatusLabel (Test-VolumeInstalled))"
         Write-Host ""
 
         Write-Host "Sistema:"
@@ -57,19 +42,19 @@ function Show-UninstallMenu {
 
         switch ($opt.ToUpper()) {
 
-            "1" { if ($chromeInstalled -and (Confirm-Action "¿Desinstalar Google Chrome?")) { Invoke-UninstallByName "*Google Chrome*" } }
-            "2" { if ($winrarInstalled -and (Confirm-Action "¿Desinstalar WinRAR?")) { Invoke-UninstallByName "*WinRAR*" } }
-            "3" { if ($discordInstalled -and (Confirm-Action "¿Desinstalar Discord?")) { Invoke-UninstallByName "*Discord*" } }
-            "4" { if ($virtualBoxInstalled -and (Confirm-Action "¿Desinstalar VirtualBox?")) { Invoke-UninstallByName "*VirtualBox*" } }
+            "1" { if (Confirm-Action "¿Desinstalar Google Chrome?") { Invoke-UninstallByName "*Google Chrome*" } }
+            "2" { if (Confirm-Action "¿Desinstalar WinRAR?") { Invoke-UninstallByName "*WinRAR*" } }
+            "3" { if (Confirm-Action "¿Desinstalar Discord?") { Invoke-UninstallByName "*Discord*" } }
+            "4" { if (Confirm-Action "¿Desinstalar VirtualBox?") { Invoke-UninstallByName "*VirtualBox*" } }
 
-            "5" { if ($steamInstalled -and (Confirm-Action "¿Desinstalar Steam?")) { Uninstall-Steam } }
-            "6" { if ($firefoxInstalled -and (Confirm-Action "¿Desinstalar Firefox?")) { Invoke-UninstallByName "*Firefox*" } }
-            "7" { if ($zipInstalled -and (Confirm-Action "¿Desinstalar 7-Zip?")) { Invoke-UninstallByName "*7-Zip*" } }
-            "8" { if ($nvidiaInstalled -and (Confirm-Action "¿Desinstalar NVIDIA App?")) { Invoke-UninstallByName "*NVIDIA App*" } }
-            "9" { if ($curaInstalled -and (Confirm-Action "¿Desinstalar Ultimaker Cura?")) { Invoke-UninstallByName "*Ultimaker Cura*" } }
+            "5" { if (Confirm-Action "¿Desinstalar Steam?") { Uninstall-Steam } }
+            "6" { if (Confirm-Action "¿Desinstalar Firefox?") { Invoke-UninstallByName "*Firefox*" } }
+            "7" { if (Confirm-Action "¿Desinstalar 7-Zip?") { Invoke-UninstallByName "*7-Zip*" } }
+            "8" { if (Confirm-Action "¿Desinstalar NVIDIA App?") { Invoke-UninstallByName "*NVIDIA App*" } }
+            "9" { if (Confirm-Action "¿Desinstalar Ultimaker Cura?") { Invoke-UninstallByName "*Ultimaker Cura*" } }
 
-            "R" { if ($radialInstalled -and (Confirm-Action "¿Eliminar Black Console Radial?")) { & "$PSScriptRoot\..\blackconsole_radial\uninstall.ps1"; Pause } }
-            "V" { if ($volumeInstalled -and (Confirm-Action "¿Eliminar control de volumen?")) { & "$PSScriptRoot\..\volume_control\uninstall.ps1"; Pause } }
+            "R" { if (Confirm-Action "¿Eliminar Black Console Radial?") { & "$PSScriptRoot\..\blackconsole_radial\uninstall.ps1"; Pause } }
+            "V" { if (Confirm-Action "¿Eliminar control de volumen?") { & "$PSScriptRoot\..\volume_control\uninstall.ps1"; Pause } }
 
             "W" { Uninstall-WindowsApps }
 

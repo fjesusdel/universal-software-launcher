@@ -2,10 +2,6 @@
 # SUBMENU - INSTALAR SOFTWARE
 # ==================================================
 
-# Cargar instaladores clasicos
-$InstallerPath = Join-Path (Split-Path $PSScriptRoot -Parent) "lib\installer.ps1"
-. $InstallerPath
-
 function Show-ManualInstallMenu {
 
     while ($true) {
@@ -19,39 +15,24 @@ function Show-ManualInstallMenu {
         Write-Host "-----------------" -ForegroundColor Cyan
         Write-Host ""
 
-        # Deteccion de estado
-        $chromeInstalled   = Is-ProgramInstalled "Google Chrome"
-        $winrarInstalled   = Is-ProgramInstalled "WinRAR"
-        $discordInstalled  = Test-DiscordInstalled
-        $virtualInstalled  = Is-ProgramInstalled "Oracle VM VirtualBox"
-
-        $steamInstalled    = Is-ProgramInstalled "Steam"
-        $firefoxInstalled  = Is-ProgramInstalled "Mozilla Firefox"
-        $zipInstalled      = Is-ProgramInstalled "7-Zip"
-        $nvidiaInstalled   = Is-ProgramInstalled "NVIDIA App"
-        $curaInstalled     = Is-ProgramInstalled "Ultimaker Cura"
-
-        $radialInstalled   = Test-RadialInstalled
-        $volumeInstalled   = Test-VolumeInstalled
-
         Write-Host "Aplicaciones:"
-        Write-Host " 1) Google Chrome $(Get-StatusLabel $chromeInstalled)"
-        Write-Host " 2) WinRAR $(Get-StatusLabel $winrarInstalled)"
-        Write-Host " 3) Discord $(Get-StatusLabel $discordInstalled)"
-        Write-Host " 4) VirtualBox $(Get-StatusLabel $virtualInstalled)"
+        Write-Host " 1) Google Chrome $(Get-StatusLabel (Test-ChromeInstalled))"
+        Write-Host " 2) WinRAR $(Get-StatusLabel (Test-WinRARInstalled))"
+        Write-Host " 3) Discord $(Get-StatusLabel (Test-DiscordInstalled))"
+        Write-Host " 4) VirtualBox $(Get-StatusLabel (Test-VirtualBoxInstalled))"
         Write-Host ""
 
         Write-Host "Aplicaciones avanzadas:"
-        Write-Host " 5) Steam $(Get-StatusLabel $steamInstalled)"
-        Write-Host " 6) Mozilla Firefox $(Get-StatusLabel $firefoxInstalled)"
-        Write-Host " 7) 7-Zip $(Get-StatusLabel $zipInstalled)"
-        Write-Host " 8) NVIDIA App $(Get-StatusLabel $nvidiaInstalled)"
-        Write-Host " 9) Ultimaker Cura $(Get-StatusLabel $curaInstalled)"
+        Write-Host " 5) Steam $(Get-StatusLabel (Test-SteamInstalled))"
+        Write-Host " 6) Mozilla Firefox $(Get-StatusLabel (Test-FirefoxInstalled))"
+        Write-Host " 7) 7-Zip $(Get-StatusLabel (Test-7ZipInstalled))"
+        Write-Host " 8) NVIDIA App $(Get-StatusLabel (Test-NvidiaAppInstalled))"
+        Write-Host " 9) Ultimaker Cura $(Get-StatusLabel (Test-UltimakerCuraInstalled))"
         Write-Host ""
 
         Write-Host "Herramientas Black Console:"
-        Write-Host " R) Black Console Radial HUD $(Get-StatusLabel $radialInstalled)"
-        Write-Host " V) Control de volumen rapido $(Get-StatusLabel $volumeInstalled)"
+        Write-Host " R) Black Console Radial HUD $(Get-StatusLabel (Test-RadialInstalled))"
+        Write-Host " V) Control de volumen rapido $(Get-StatusLabel (Test-VolumeInstalled))"
         Write-Host ""
 
         Write-Host " 0) Volver"
