@@ -1,51 +1,71 @@
 # ==================================================
-# INSTALACIÓN MANUAL - BLACK CONSOLE
+# INSTALACIÓN MANUAL - BLACK CONSOLE (RECONSTRUIDA)
 # ==================================================
 
 function Show-ManualInstallMenu {
 
-    Clear-Host
-    Write-Host "INSTALAR SOFTWARE"
-    Write-Host ""
+    while ($true) {
 
-    Write-Host "Aplicaciones:"
-    Write-Host " 1) Google Chrome"
-    Write-Host " 2) WinRAR"
-    Write-Host " 3) Discord"
-    Write-Host " 4) VirtualBox"
-    Write-Host ""
-    Write-Host "Aplicaciones avanzadas:"
-    Write-Host " 5) Steam"
-    Write-Host " 6) Mozilla Firefox"
-    Write-Host " 7) 7-Zip"
-    Write-Host " 8) NVIDIA App"
-    Write-Host " 9) Ultimaker Cura"
-    Write-Host ""
-    Write-Host "Herramientas Black Console:"
-    Write-Host " R) Black Console Radial HUD"
-    Write-Host " V) Control de volumen rápido"
-    Write-Host ""
-    Write-Host " 0) Volver"
-    Write-Host ""
+        Clear-Host
+        Show-Banner
+        Show-Signature
 
-    $opt = Read-Host "Seleccione una opción"
+        Write-Host ""
+        Write-Host "INSTALAR SOFTWARE" -ForegroundColor Cyan
+        Write-Host "-----------------" -ForegroundColor Cyan
+        Write-Host ""
 
-    switch ($opt.ToUpper()) {
-        "1" { Install-Chrome }
-        "2" { Install-WinRAR }
-        "3" { Install-Discord }
-        "4" { Install-VirtualBox }
-        "5" { Install-Steam }
-        "6" { Install-Firefox }
-        "7" { Install-7Zip }
-        "8" { Install-NvidiaApp }
-        "9" { Install-UltimakerCura }
-        "R" { Install-BlackConsoleRadial }
-        "V" { Install-VolumeControl }
-        "0" { return }
-        default {
-            Write-Host "Opción no válida" -ForegroundColor Red
-            Start-Sleep 1
+        Write-Host "Aplicaciones:"
+        Write-Host " [1] Google Chrome        $(Get-StatusLabel (Test-ChromeInstalled))"
+        Write-Host " [2] WinRAR               $(Get-StatusLabel (Test-WinRARInstalled))"
+        Write-Host " [3] Discord              $(Get-StatusLabel (Test-DiscordInstalled))"
+        Write-Host " [4] VirtualBox           $(Get-StatusLabel (Test-VirtualBoxInstalled))"
+        Write-Host ""
+
+        Write-Host "Aplicaciones avanzadas:"
+        Write-Host " [5] Steam                $(Get-StatusLabel (Test-SteamInstalled))"
+        Write-Host " [6] Mozilla Firefox      $(Get-StatusLabel (Test-FirefoxInstalled))"
+        Write-Host " [7] 7-Zip                $(Get-StatusLabel (Test-7ZipInstalled))"
+        Write-Host " [8] NVIDIA App           $(Get-StatusLabel (Test-NvidiaAppInstalled))"
+        Write-Host " [9] Ultimaker Cura       $(Get-StatusLabel (Test-UltimakerCuraInstalled))"
+        Write-Host ""
+
+        Write-Host "Herramientas Black Console:"
+        Write-Host " [R] Black Console Radial HUD    $(Get-StatusLabel (Test-RadialInstalled))"
+        Write-Host " [V] Control de volumen rapido  $(Get-StatusLabel (Test-VolumeInstalled))"
+        Write-Host ""
+
+        Write-Host " [0] Volver"
+        Write-Host ""
+
+        $opt = Read-Host "Seleccione una opcion"
+
+        switch ($opt.ToUpper()) {
+
+            "1" { Install-Chrome }
+            "2" { Install-WinRAR }
+            "3" { Install-Discord }
+            "4" { Install-VirtualBox }
+
+            "5" { Install-Steam }
+            "6" { Install-Firefox }
+            "7" { Install-7Zip }
+            "8" { Install-NvidiaApp }
+            "9" { Install-UltimakerCura }
+
+            "R" { Install-BlackConsoleRadial }
+            "V" { Install-VolumeControl }
+
+            "0" { return }
+
+            default {
+                Write-Host ""
+                Write-Host "Opcion no valida." -ForegroundColor Red
+            }
         }
+
+        Write-Host ""
+        Write-Host "Pulse cualquier tecla para continuar..." -ForegroundColor DarkGray
+        [void][System.Console]::ReadKey($true)
     }
 }
