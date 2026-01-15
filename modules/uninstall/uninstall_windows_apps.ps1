@@ -1,5 +1,9 @@
 function Uninstall-WindowsApps {
 
+    # Desactivar progreso para evitar barras azules
+    $oldProgress = $ProgressPreference
+    $ProgressPreference = 'SilentlyContinue'
+
     Clear-Host
     Show-Banner
     Show-Signature
@@ -18,6 +22,7 @@ function Uninstall-WindowsApps {
     Write-Host ""
 
     if (-not (Confirm-Action "¿Deseas continuar?")) {
+        $ProgressPreference = $oldProgress
         return
     }
 
@@ -40,35 +45,46 @@ function Uninstall-WindowsApps {
             Where-Object { $_.DisplayName -like $app } |
             ForEach-Object {
                 try {
-                    Remove-AppxProvisionedPackage -Online -PackageName $_.PackageName -ErrorAction Stop
+                    Remove-AppxProvisionedPackage -Online `
+                        -PackageName $_.PackageName `
+                        -ErrorAction Stop | Out-Null
                 } catch {
-                    $Failed += $_.PackageName
+                    $Failed += $_.DisplayName
                 }
             }
 
-        # Quitar para el usuario actual
+        # Quitar para usuario actual
         Get-AppxPackage -Name $app -ErrorAction SilentlyContinue |
             ForEach-Object {
                 try {
-                    Remove-AppxPackage -Package $_.PackageFullName -ErrorAction Stop
+                    Remove-AppxPackage `
+                        -Package $_.PackageFullName `
+                        -ErrorAction Stop | Out-Null
                 } catch {
                     $Failed += $_.Name
                 }
             }
     }
 
+    # Restaurar progreso
+    $ProgressPreference = $oldProgress
+
+    Clear-Host
+    Show-Banner
+    Show-Signature
+
     Write-Host ""
-    Write-Host "[OK] Proceso finalizado." -ForegroundColor Green
+    Write-Host "[OK] Proceso de limpieza finalizado." -ForegroundColor Green
 
     if ($Failed.Count -gt 0) {
         Write-Host ""
-        Write-Host "Las siguientes apps no se pudieron eliminar por restricciones del sistema:" -ForegroundColor Yellow
+        Write-Host "Algunas apps no se pudieron eliminar por restricciones del sistema:" -ForegroundColor Yellow
         $Failed | Sort-Object -Unique | ForEach-Object {
             Write-Host " - $_" -ForegroundColor DarkGray
         }
     }
 
     Write-Host ""
-    Write-Host "Windows permanece estable. No se ha eliminado ningun componente critico." -ForegroundColor Cyan
+    Write-Host "Windows permanece estable. No se han eliminado componentes criticos." -ForegroundColor Cyan
     Pause
 }
