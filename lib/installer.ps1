@@ -2,161 +2,60 @@
 # INSTALLER CORE - BLACK CONSOLE
 # ==================================================
 
-# -------------------------------
-# UTILIDADES VISUALES
-# -------------------------------
-
 function Write-Info  { param($m) Write-Host "[*] $m" -ForegroundColor Cyan }
 function Write-Ok    { param($m) Write-Host "[OK] $m" -ForegroundColor Green }
 function Write-Skip  { param($m) Write-Host "[SKIP] $m" -ForegroundColor Yellow }
-
-# -------------------------------
-# DESCARGA
-# -------------------------------
-
-function Download-File {
-    param (
-        [string]$Url,
-        [string]$OutFile
-    )
-
-    Write-Info "Descargando $Url"
-    Invoke-WebRequest $Url -OutFile $OutFile
-}
-
-# -------------------------------
-# INSTALADORES
-# -------------------------------
-
-function Install-Chrome {
-
-    if (Test-ChromeInstalled) {
-        Write-Skip "Google Chrome ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando Google Chrome..."
-    $tmp = "$env:TEMP\chrome_installer.exe"
-    Download-File "https://www.google.com/chrome/?standalone=1" $tmp
-    Start-Process $tmp -ArgumentList "/silent /install" -Wait
-    Write-Ok "Google Chrome instalado."
-}
-
-function Install-WinRAR {
-
-    if (Test-WinRARInstalled) {
-        Write-Skip "WinRAR ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando WinRAR..."
-    $tmp = "$env:TEMP\winrar_installer.exe"
-    Download-File "https://www.rarlab.com/rar/winrar-x64-621.exe" $tmp
-    Start-Process $tmp -ArgumentList "/S" -Wait
-    Write-Ok "WinRAR instalado."
-}
-
-function Install-Discord {
-
-    if (Test-DiscordInstalled) {
-        Write-Skip "Discord ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando Discord..."
-    $tmp = "$env:TEMP\discord_installer.exe"
-    Download-File "https://discord.com/api/download?platform=win" $tmp
-    Start-Process $tmp -Wait
-    Write-Ok "Discord instalado."
-}
-
-function Install-VirtualBox {
-
-    if (Test-VirtualBoxInstalled) {
-        Write-Skip "VirtualBox ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando VirtualBox..."
-    $tmp = "$env:TEMP\virtualbox_installer.exe"
-    Download-File "https://download.virtualbox.org/virtualbox/7.1.4/VirtualBox-7.1.4-165100-Win.exe" $tmp
-    Start-Process $tmp -ArgumentList "--silent" -Wait
-    Write-Ok "VirtualBox instalado."
-}
-
-function Install-Steam {
-
-    if (Test-SteamInstalled) {
-        Write-Skip "Steam ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando Steam..."
-    $tmp = "$env:TEMP\steam_installer.exe"
-    Download-File "https://cdn.akamai.steamstatic.com/client/installer/SteamSetup.exe" $tmp
-    Start-Process $tmp -ArgumentList "/S" -Wait
-    Write-Ok "Steam instalado."
-}
-
-function Install-Firefox {
-
-    if (Test-FirefoxInstalled) {
-        Write-Skip "Mozilla Firefox ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando Mozilla Firefox..."
-    $tmp = "$env:TEMP\firefox_installer.exe"
-    Download-File "https://download.mozilla.org/?product=firefox-latest&os=win64&lang=es-ES" $tmp
-    Start-Process $tmp -ArgumentList "-ms" -Wait
-    Write-Ok "Firefox instalado."
-}
-
-function Install-7Zip {
-
-    if (Test-7ZipInstalled) {
-        Write-Skip "7-Zip ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando 7-Zip..."
-    $tmp = "$env:TEMP\7zip_installer.exe"
-    Download-File "https://www.7-zip.org/a/7z2301-x64.exe" $tmp
-    Start-Process $tmp -ArgumentList "/S" -Wait
-    Write-Ok "7-Zip instalado."
-}
-
-function Install-NvidiaApp {
-
-    if (Test-NvidiaAppInstalled) {
-        Write-Skip "NVIDIA App ya esta instalada."
-        return
-    }
-
-    Write-Info "Instalando NVIDIA App..."
-    $tmp = "$env:TEMP\nvidia_installer.exe"
-    Download-File "https://us.download.nvidia.com/nvapp/client/10.0.0.535/NVIDIA_app_v10.0.0.535.exe" $tmp
-    Start-Process $tmp -ArgumentList "/S" -Wait
-    Write-Ok "NVIDIA App instalada."
-}
-
-function Install-UltimakerCura {
-
-    if (Test-UltimakerCuraInstalled) {
-        Write-Skip "Ultimaker Cura ya esta instalado."
-        return
-    }
-
-    Write-Info "Instalando Ultimaker Cura..."
-    $tmp = "$env:TEMP\cura_installer.exe"
-    Download-File "https://github.com/Ultimaker/Cura/releases/latest/download/UltiMaker-Cura-Windows.exe" $tmp
-    Start-Process $tmp -ArgumentList "/S" -Wait
-    Write-Ok "Ultimaker Cura instalado."
-}
+function Write-Fail  { param($m) Write-Host "[ERROR] $m" -ForegroundColor Red }
 
 # ==================================================
-# DESINSTALADORES
+# BLACK CONSOLE TOOLS
 # ==================================================
+
+function Install-QuickVolumeControl {
+
+    if (Test-QuickVolumeInstalled) {
+        Write-Skip "Control de volumen rapido ya instalado."
+        return
+    }
+
+    Write-Info "Instalando Control de Volumen rapido..."
+
+    $sourceExe = Join-Path $PSScriptRoot "bin\volume.exe"
+    $installDir = "$env:APPDATA\BlackConsole\QuickVolume"
+    $targetExe = Join-Path $installDir "volume.exe"
+
+    if (-not (Test-Path $sourceExe)) {
+        Write-Fail "volume.exe no encontrado en lib/bin."
+        return
+    }
+
+    New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+    Copy-Item $sourceExe $targetExe -Force
+
+    Write-Ok "Control de Volumen rapido instalado."
+    Write-Host ""
+    Write-Host "METODO DE USO:" -ForegroundColor Cyan
+    Write-Host " CTRL + Flecha ARRIBA  -> Subir volumen"
+    Write-Host " CTRL + Flecha ABAJO   -> Bajar volumen"
+    Write-Host " CTRL + M              -> Silenciar (MUTE)"
+    Write-Host ""
+    Write-Host "La aplicacion se ejecuta en segundo plano."
+}
+
+function Uninstall-QuickVolumeControl {
+
+    Write-Info "Eliminando Control de Volumen rapido..."
+
+    $installDir = "$env:APPDATA\BlackConsole\QuickVolume"
+
+    if (Test-Path $installDir) {
+        Remove-Item $installDir -Recurse -Force
+        Write-Ok "Control de Volumen eliminado."
+    }
+    else {
+        Write-Skip "No estaba instalado."
+    }
+}
 
 function Uninstall-BlackConsoleRadial {
 
@@ -166,30 +65,9 @@ function Uninstall-BlackConsoleRadial {
 
     if (Test-Path $skinPath) {
         Remove-Item $skinPath -Recurse -Force
-        Write-Ok "Skin eliminado."
-    } else {
-        Write-Skip "Skin no encontrado."
+        Write-Ok "Radial HUD eliminado."
     }
-
-    Write-Info "Reiniciando Rainmeter..."
-    Stop-Process -Name Rainmeter -Force -ErrorAction SilentlyContinue
-    Start-Process "C:\Program Files\Rainmeter\Rainmeter.exe" -ErrorAction SilentlyContinue
-
-    Write-Ok "Black Console Radial HUD desinstalado."
-}
-
-function Uninstall-QuickVolumeControl {
-
-    Write-Info "Eliminando control de volumen rapido..."
-
-    $path = "$env:APPDATA\BlackConsole\QuickVolume"
-
-    if (Test-Path $path) {
-        Remove-Item $path -Recurse -Force
-        Write-Ok "Archivos eliminados."
-    } else {
-        Write-Skip "No se encontraron archivos."
+    else {
+        Write-Skip "Radial HUD no encontrado."
     }
-
-    Write-Ok "Control de volumen rapido eliminado."
 }
