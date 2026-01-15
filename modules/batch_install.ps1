@@ -6,6 +6,16 @@
 $InstallerPath = Join-Path $PSScriptRoot "..\lib\installer.ps1"
 . $InstallerPath
 
+function Test-VirtualBoxInstalled {
+    if (Is-ProgramInstalled "Oracle VM VirtualBox") {
+        return $true
+    }
+    if (Get-Service -Name "VBox*" -ErrorAction SilentlyContinue) {
+        return $true
+    }
+    return $false
+}
+
 function Start-BatchInstall {
 
     Clear-Host
@@ -33,21 +43,21 @@ function Start-BatchInstall {
     }
 
     # ---------- Aplicaciones ----------
-    Ask "Google Chrome"      (Is-ProgramInstalled "Google Chrome")      { Install-Chrome }
-    Ask "WinRAR"             (Is-ProgramInstalled "WinRAR")             { Install-WinRAR }
-    Ask "Discord"            (Test-DiscordInstalled)                     { Install-Discord }
-    Ask "VirtualBox"         (Is-ProgramInstalled "Oracle VM VirtualBox"){ Install-VirtualBox }
+    Ask "Google Chrome"      (Is-ProgramInstalled "Google Chrome")        { Install-Chrome }
+    Ask "WinRAR"             (Is-ProgramInstalled "WinRAR")               { Install-WinRAR }
+    Ask "Discord"            (Test-DiscordInstalled)                       { Install-Discord }
+    Ask "VirtualBox"         (Test-VirtualBoxInstalled)                   { Install-VirtualBox }
 
     # ---------- Avanzadas ----------
-    Ask "Steam"              (Is-ProgramInstalled "Steam")               { Install-Steam }
-    Ask "Mozilla Firefox"    (Is-ProgramInstalled "Mozilla Firefox")     { Install-Firefox }
-    Ask "7-Zip"              (Is-ProgramInstalled "7-Zip")               { Install-7Zip }
-    Ask "NVIDIA App"         (Is-ProgramInstalled "NVIDIA App")           { Install-NvidiaApp }
-    Ask "Ultimaker Cura"     (Is-ProgramInstalled "Ultimaker Cura")      { Install-UltimakerCura }
+    Ask "Steam"              (Is-ProgramInstalled "Steam")                { Install-Steam }
+    Ask "Mozilla Firefox"    (Is-ProgramInstalled "Mozilla Firefox")      { Install-Firefox }
+    Ask "7-Zip"              (Is-ProgramInstalled "7-Zip")                { Install-7Zip }
+    Ask "NVIDIA App"         (Is-ProgramInstalled "NVIDIA App")            { Install-NvidiaApp }
+    Ask "Ultimaker Cura"     (Is-ProgramInstalled "Ultimaker Cura")       { Install-UltimakerCura }
 
     # ---------- Black Console ----------
-    Ask "Black Console Radial HUD" (Test-RadialInstalled)  { Install-BlackConsoleRadial }
-    Ask "Control de volumen rapido" (Test-VolumeInstalled){ Install-VolumeControl }
+    Ask "Black Console Radial HUD" (Test-RadialInstalled)   { Install-BlackConsoleRadial }
+    Ask "Control de volumen rapido" (Test-VolumeInstalled) { Install-VolumeControl }
 
     if ($Queue.Count -eq 0) {
         Write-Host ""
