@@ -16,6 +16,7 @@ $modules = @(
     "$BasePath\lib\installer.ps1",
     "$BasePath\modules\hardware_detect.ps1",
     "$BasePath\modules\manual_install.ps1",
+    "$BasePath\modules\blackconsole_radial.ps1",   # 👈 NUEVO
     "$BasePath\modules\prechecks.ps1",
     "$BasePath\modules\snapshot.ps1",
     "$BasePath\modules\presets.ps1",
@@ -56,6 +57,12 @@ Show-MainScreen
 while ($true) {
 
     Show-Menu
+    Write-Host ""
+    Write-Host "INSTALACIONES MANUALES" -ForegroundColor Cyan
+    Write-Host "----------------------"
+    Write-Host "R) Instalar Black Console Radial HUD"
+    Write-Host ""
+
     $opt = Read-Host "Seleccione una opcion"
 
     switch ($opt.ToUpper()) {
@@ -72,6 +79,8 @@ while ($true) {
         "8" { Install-7Zip }
         "9" { Install-NvidiaApp }
         "10" { Install-UltimakerCura }
+
+        "R" { Install-BlackConsoleRadial }
 
         "A" { Show-About }
 
