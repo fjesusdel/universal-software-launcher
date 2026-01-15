@@ -1,5 +1,6 @@
 # ==================================================
 # INSTALLER CORE - BLACK CONSOLE
+# Version compatible con menus modulares
 # ==================================================
 
 # -------------------------------
@@ -64,7 +65,7 @@ function Download-File {
         [string]$OutFile
     )
 
-    Write-Host "[*] Descargando $Url"
+    Write-Host "[*] Descargando $Url" -ForegroundColor Cyan
     Invoke-WebRequest $Url -OutFile $OutFile -UseBasicParsing
 }
 
@@ -160,4 +161,106 @@ function Install-VirtualBox {
     Start-Process $tmp -ArgumentList "--silent" -Wait
 
     Write-Ok "VirtualBox instalado."
+}
+
+# -------------------------------
+# APLICACIONES AVANZADAS
+# -------------------------------
+
+function Install-Steam {
+
+    if (Is-ProgramInstalled "Steam" @(
+        "$env:ProgramFiles(x86)\Steam\Steam.exe"
+    )) {
+        Write-Skip "Steam ya esta instalado."
+        return
+    }
+
+    Write-Info "Instalando Steam..."
+
+    $url = "https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe"
+    $tmp = "$env:TEMP\steam_installer.exe"
+
+    Download-File $url $tmp
+    Start-Process $tmp -ArgumentList "/S" -Wait
+
+    Write-Ok "Steam instalado."
+}
+
+function Install-Firefox {
+
+    if (Is-ProgramInstalled "Mozilla Firefox" @(
+        "$env:ProgramFiles\Mozilla Firefox\firefox.exe",
+        "$env:ProgramFiles(x86)\Mozilla Firefox\firefox.exe"
+    )) {
+        Write-Skip "Firefox ya esta instalado."
+        return
+    }
+
+    Write-Info "Instalando Firefox..."
+
+    $url = "https://download.mozilla.org/?product=firefox-latest&os=win64&lang=es-ES"
+    $tmp = "$env:TEMP\firefox_installer.exe"
+
+    Download-File $url $tmp
+    Start-Process $tmp -ArgumentList "/S" -Wait
+
+    Write-Ok "Firefox instalado."
+}
+
+function Install-7Zip {
+
+    if (Is-ProgramInstalled "7-Zip" @(
+        "$env:ProgramFiles\7-Zip\7z.exe",
+        "$env:ProgramFiles(x86)\7-Zip\7z.exe"
+    )) {
+        Write-Skip "7-Zip ya esta instalado."
+        return
+    }
+
+    Write-Info "Instalando 7-Zip..."
+
+    $url = "https://www.7-zip.org/a/7z2301-x64.exe"
+    $tmp = "$env:TEMP\7zip_installer.exe"
+
+    Download-File $url $tmp
+    Start-Process $tmp -ArgumentList "/S" -Wait
+
+    Write-Ok "7-Zip instalado."
+}
+
+function Install-NvidiaApp {
+
+    if (Is-ProgramInstalled "NVIDIA App") {
+        Write-Skip "NVIDIA App ya esta instalada."
+        return
+    }
+
+    Write-Info "Instalando NVIDIA App..."
+
+    $url = "https://us.download.nvidia.com/nvapp/client/NVIDIA_app_v10.0.1.256.exe"
+    $tmp = "$env:TEMP\nvidia_app_installer.exe"
+
+    Download-File $url $tmp
+    Start-Process $tmp -ArgumentList "/S" -Wait
+
+    Write-Ok "NVIDIA App instalada."
+}
+
+function Install-UltimakerCura {
+
+    if (Is-ProgramInstalled "Ultimaker Cura") {
+        Write-Skip "Ultimaker Cura ya esta instalada."
+        return
+    }
+
+    Write-Info "Instalando Ultimaker Cura..."
+
+    $url = "https://github.com/Ultimaker/Cura/releases/latest/download/UltiMaker-Cura-5.6.0-win64.exe"
+    $tmp = "$env:TEMP\cura_installer.exe"
+
+    Download-File $url $tmp
+    Start-Process $tmp -ArgumentList "/S" -Wait
+
+    Write-Ok "Ultimaker Cura instalada."
 }
