@@ -10,13 +10,21 @@ $Host.UI.RawUI.WindowTitle = "Black Console"
 
 $BasePath = Split-Path -Parent $MyInvocation.MyCommand.Path
 
+# ==================================================
+# CARGA DE MODULOS
+# ==================================================
+
 $modules = @(
     "$BasePath\lib\config.ps1",
     "$BasePath\lib\ui.ps1",
     "$BasePath\lib\installer.ps1",
+
     "$BasePath\modules\hardware_detect.ps1",
     "$BasePath\modules\manual_install.ps1",
-    "$BasePath\modules\blackconsole_radial.ps1",   # NUEVO
+
+    "$BasePath\modules\blackconsole_radial.ps1",   # Radial HUD
+    "$BasePath\modules\volume_control.ps1",        # Control de volumen
+
     "$BasePath\modules\prechecks.ps1",
     "$BasePath\modules\snapshot.ps1",
     "$BasePath\modules\presets.ps1",
@@ -28,7 +36,8 @@ $modules = @(
 foreach ($module in $modules) {
     try {
         Import-Module $module -ErrorAction Stop
-    } catch {
+    }
+    catch {
         Clear-Host
         Write-Host "ERROR CRITICO AL INICIAR BLACK CONSOLE" -ForegroundColor Red
         Write-Host ""
@@ -46,6 +55,10 @@ if ($Verbose) {
     $Global:BlackConsole.Verbose = $true
 }
 
+# ==================================================
+# UI PRINCIPAL
+# ==================================================
+
 function Show-MainScreen {
     Clear-Host
     Show-Banner
@@ -54,12 +67,19 @@ function Show-MainScreen {
 
 Show-MainScreen
 
+# ==================================================
+# BUCLE PRINCIPAL
+# ==================================================
+
 while ($true) {
 
     Show-Menu
 
     Write-Host ""
-    Write-Host "R) Instalar Black Console Radial HUD" -ForegroundColor Cyan
+    Write-Host "APLICACIONES BLACK CONSOLE" -ForegroundColor Cyan
+    Write-Host "--------------------------"
+    Write-Host "R) Instalar Black Console Radial HUD"
+    Write-Host "V) Instalar Control de volumen rapido"
     Write-Host ""
 
     $opt = Read-Host "Seleccione una opcion"
@@ -80,6 +100,7 @@ while ($true) {
         "10" { Install-UltimakerCura }
 
         "R" { Install-BlackConsoleRadial }
+        "V" { Install-VolumeControl }
 
         "A" { Show-About }
 
@@ -98,5 +119,6 @@ while ($true) {
     Write-Host ""
     Write-Host "Pulse cualquier tecla para volver al menu..." -ForegroundColor DarkGray
     [void][System.Console]::ReadKey($true)
+
     Show-MainScreen
 }
