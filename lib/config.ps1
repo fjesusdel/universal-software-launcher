@@ -4,10 +4,11 @@
 
 $Global:BlackConsole = @{
     Name    = "Black Console"
+    Version = "1.8.0"
     Author  = "Fran Delgado"
-    Version = "1.7.0"
     Verbose = $false
 }
+
 
 $Global:StartupPhrases = @(
     "Inicializando entorno Black Console...",
