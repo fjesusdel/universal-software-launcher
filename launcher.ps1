@@ -57,6 +57,11 @@ Show-MainScreen
 while ($true) {
 
     Show-Menu
+
+    Write-Host ""
+    Write-Host "R) Instalar Black Console Radial HUD" -ForegroundColor Cyan
+    Write-Host ""
+
     $opt = Read-Host "Seleccione una opcion"
 
     switch ($opt.ToUpper()) {
@@ -68,12 +73,13 @@ while ($true) {
         "4" { Install-Discord }
         "5" { Install-VirtualBox }
 
-        "6" { Install-BlackConsoleRadial }
-        "7" { Install-Steam }
-        "8" { Install-Firefox }
-        "9" { Install-7Zip }
-        "10" { Install-NvidiaApp }
-        "11" { Install-UltimakerCura }
+        "6" { Install-Steam }
+        "7" { Install-Firefox }
+        "8" { Install-7Zip }
+        "9" { Install-NvidiaApp }
+        "10" { Install-UltimakerCura }
+
+        "R" { Install-BlackConsoleRadial }
 
         "A" { Show-About }
 
