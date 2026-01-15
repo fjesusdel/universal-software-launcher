@@ -1,5 +1,23 @@
+function Test-AppInstalledByName($Pattern) {
+
+    $Keys = @(
+        "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+        "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+    )
+
+    foreach ($key in $Keys) {
+        Get-ChildItem $key -ErrorAction SilentlyContinue | ForEach-Object {
+            $app = Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue
+            if ($app.DisplayName -and $app.DisplayName -like $Pattern) {
+                return $true
+            }
+        }
+    }
+    return $false
+}
+
 function Test-SteamInstalled {
-    Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam"
+    Test-AppInstalledByName "*Steam*"
 }
 
 function Test-RadialInstalled {
@@ -11,10 +29,5 @@ function Test-VolumeInstalled {
 }
 
 function Get-StatusLabel($Installed) {
-    if ($Installed) {
-        return "[INSTALADO]"
-    }
-    else {
-        return "[NO INSTALADO]"
-    }
+    if ($Installed) { "[INSTALADO]" } else { "[NO INSTALADO]" }
 }

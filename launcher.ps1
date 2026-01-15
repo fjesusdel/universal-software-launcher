@@ -4,10 +4,13 @@ param (
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 chcp 65001 | Out-Null
-
 $ErrorActionPreference = "Stop"
 
 $BasePath = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+# =========================
+# CARGA DE MODULOS
+# =========================
 
 $modules = @(
     "$BasePath\lib\config.ps1",
@@ -15,7 +18,9 @@ $modules = @(
     "$BasePath\lib\installer.ps1",
 
     "$BasePath\modules\hardware_detect.ps1",
-    "$BasePath\modules\manual_install.ps1",
+
+    "$BasePath\modules\manual_install.ps1",        # SUBMENU INSTALAR
+    "$BasePath\modules\uninstall\menu.ps1",        # SUBMENU ELIMINAR
 
     "$BasePath\modules\blackconsole_radial.ps1",
     "$BasePath\modules\volume_control.ps1",
@@ -24,13 +29,8 @@ $modules = @(
     "$BasePath\modules\uninstall\confirm.ps1",
     "$BasePath\modules\uninstall\uninstall_apps.ps1",
     "$BasePath\modules\uninstall\uninstall_windows_apps.ps1",
-    "$BasePath\modules\uninstall\menu.ps1",
 
-    "$BasePath\modules\prechecks.ps1",
-    "$BasePath\modules\snapshot.ps1",
-    "$BasePath\modules\presets.ps1",
     "$BasePath\modules\prepare_new_pc.ps1",
-    "$BasePath\modules\system_diagnostic.ps1",
     "$BasePath\modules\about.ps1"
 )
 
@@ -40,38 +40,51 @@ foreach ($module in $modules) {
 
 $Host.UI.RawUI.WindowTitle = "$($Global:BlackConsole.Name) v$($Global:BlackConsole.Version)"
 
-function Show-MainScreen {
+# =========================
+# UI PRINCIPAL
+# =========================
+
+function Show-MainMenu {
+
     Clear-Host
     Show-Banner
     Show-Signature
+
     Write-Host ""
-    Write-Host "$($Global:BlackConsole.Name) v$($Global:BlackConsole.Version)" -ForegroundColor DarkGray
+    Write-Host "INSTALACION AUTOMATICA"
+    Write-Host "[1] Prepare New PC (Recommended)"
+    Write-Host ""
+
+    Write-Host "INSTALACION DE SOFTWARE"
+    Write-Host "[2] Instalar software"
+    Write-Host ""
+
+    Write-Host "DESINSTALACION DE SOFTWARE"
+    Write-Host "[3] Eliminar software"
+    Write-Host ""
+
+    Write-Host "OTRAS OPCIONES"
+    Write-Host "[A] Acerca de Black Console"
+    Write-Host "[0] Salir"
+    Write-Host ""
 }
 
-Show-MainScreen
+# =========================
+# BUCLE PRINCIPAL
+# =========================
 
 while ($true) {
 
-    Show-Menu
-    Write-Host ""
-    Write-Host "3) Eliminar software" -ForegroundColor Cyan
-    Write-Host ""
-
+    Show-MainMenu
     $opt = Read-Host "Seleccione una opcion"
 
     switch ($opt.ToUpper()) {
 
         "1" { Prepare-NewPC }
-        "2" { Install-Chrome }
+        "2" { Show-ManualInstallMenu }
         "3" { Show-UninstallMenu }
 
-        "6" { Install-Steam }
-
-        "R" { Install-BlackConsoleRadial }
-        "V" { Install-VolumeControl }
-
         "A" { Show-About }
-
         "0" { exit }
 
         default {
@@ -81,5 +94,4 @@ while ($true) {
     }
 
     Pause
-    Show-MainScreen
 }
