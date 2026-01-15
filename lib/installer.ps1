@@ -20,12 +20,15 @@ function Install-QuickVolumeControl {
 
     Write-Info "Instalando Control de Volumen rapido..."
 
-    $sourceExe = Join-Path $PSScriptRoot "bin\volume.exe"
+    $sourceExe  = Join-Path $PSScriptRoot "volume.exe"
     $installDir = "$env:APPDATA\BlackConsole\QuickVolume"
-    $targetExe = Join-Path $installDir "volume.exe"
+    $targetExe  = Join-Path $installDir "volume.exe"
+
+    Write-Host "Buscando volume.exe en:"
+    Write-Host " $sourceExe" -ForegroundColor DarkGray
 
     if (-not (Test-Path $sourceExe)) {
-        Write-Fail "volume.exe no encontrado en lib/bin."
+        Write-Fail "volume.exe no encontrado."
         return
     }
 
