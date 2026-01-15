@@ -1,146 +1,102 @@
 # ==================================================
-# DETECCION CENTRALIZADA - BLACK CONSOLE
+# DETECTION CORE - BLACK CONSOLE
 # ==================================================
 
-# -------------------------------
-# DETECCION POR REGISTRO
-# -------------------------------
-
-function Test-RegistryProgram {
-    param ([string]$Name)
-
-    $paths = @(
-        "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
-        "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*",
-        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*"
-    )
-
-    foreach ($path in $paths) {
-        try {
-            if (Get-ItemProperty $path -ErrorAction SilentlyContinue |
-                Where-Object { $_.DisplayName -like "*$Name*" }) {
-                return $true
-            }
-        } catch {}
-    }
-    return $false
+# Utilidad comun
+function Test-PathSafe {
+    param ($Path)
+    return ($Path -and (Test-Path $Path))
 }
 
-# -------------------------------
-# DETECCION POR RUTA
-# -------------------------------
-
-function Test-PathProgram {
-    param ([string[]]$Paths)
-
-    foreach ($p in $Paths) {
-        if (Test-Path $p) {
-            return $true
-        }
-    }
-    return $false
-}
-
-# -------------------------------
-# APPS CLASICAS
-# -------------------------------
-
+# --------------------------------------------------
+# GOOGLE CHROME
+# --------------------------------------------------
 function Test-ChromeInstalled {
-    Test-RegistryProgram "Google Chrome" -or
-    Test-PathProgram @(
-        "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
-        "$env:ProgramFiles(x86)\Google\Chrome\Application\chrome.exe"
-    )
+    return Test-PathSafe "C:\Program Files\Google\Chrome\Application\chrome.exe"
 }
 
+# --------------------------------------------------
+# WINRAR
+# --------------------------------------------------
 function Test-WinRARInstalled {
-    Test-RegistryProgram "WinRAR" -or
-    Test-PathProgram @(
-        "$env:ProgramFiles\WinRAR\WinRAR.exe",
-        "$env:ProgramFiles(x86)\WinRAR\WinRAR.exe"
-    )
+    return Test-PathSafe "C:\Program Files\WinRAR\WinRAR.exe"
 }
 
-function Test-FirefoxInstalled {
-    Test-RegistryProgram "Mozilla Firefox"
-}
-
-function Test-7ZipInstalled {
-    Test-RegistryProgram "7-Zip"
-}
-
-function Test-NvidiaAppInstalled {
-    Test-RegistryProgram "NVIDIA App"
-}
-
-function Test-UltimakerCuraInstalled {
-    Test-RegistryProgram "Ultimaker Cura"
-}
-
-# -------------------------------
-# DISCORD (INSTALACION POR USUARIO)
-# -------------------------------
-
+# --------------------------------------------------
+# DISCORD
+# --------------------------------------------------
 function Test-DiscordInstalled {
 
-    if (Test-RegistryProgram "Discord") {
-        return $true
-    }
-
-    $discordPath = Join-Path $env:LOCALAPPDATA "Discord\Update.exe"
-    if (Test-Path $discordPath) {
-        return $true
-    }
-
-    return $false
-}
-
-# -------------------------------
-# STEAM
-# -------------------------------
-
-function Test-SteamInstalled {
-    Test-RegistryProgram "Steam" -or
-    Test-PathProgram @(
-        "$env:ProgramFiles(x86)\Steam\Steam.exe",
-        "$env:ProgramFiles\Steam\Steam.exe"
+    $paths = @(
+        "$env:LOCALAPPDATA\Discord\Update.exe",
+        "$env:APPDATA\Discord\Update.exe"
     )
-}
 
-# -------------------------------
-# VIRTUALBOX (SERVICIOS + REGISTRO)
-# -------------------------------
-
-function Test-VirtualBoxInstalled {
-
-    if (Test-RegistryProgram "Oracle VM VirtualBox") {
-        return $true
-    }
-
-    if (Get-Service -Name "VBox*" -ErrorAction SilentlyContinue) {
-        return $true
+    foreach ($p in $paths) {
+        if (Test-PathSafe $p) { return $true }
     }
 
     return $false
 }
 
-# -------------------------------
-# HERRAMIENTAS BLACK CONSOLE
-# -------------------------------
-
-function Test-RadialInstalled {
-    Test-Path "$env:USERPROFILE\Documents\Rainmeter\Skins\BlackConsole"
+# --------------------------------------------------
+# VIRTUALBOX
+# --------------------------------------------------
+function Test-VirtualBoxInstalled {
+    return Test-PathSafe "C:\Program Files\Oracle\VirtualBox\VirtualBox.exe"
 }
 
-function Test-VolumeInstalled {
-    Test-Path "C:\BlackConsole\bin\volume.exe"
+# --------------------------------------------------
+# STEAM
+# --------------------------------------------------
+function Test-SteamInstalled {
+    return Test-PathSafe "C:\Program Files (x86)\Steam\Steam.exe"
 }
 
-# -------------------------------
-# UTILIDAD VISUAL
-# -------------------------------
+# --------------------------------------------------
+# FIREFOX
+# --------------------------------------------------
+function Test-FirefoxInstalled {
+    return Test-PathSafe "C:\Program Files\Mozilla Firefox\firefox.exe"
+}
 
-function Get-StatusLabel {
-    param ($Installed)
-    if ($Installed) { "[INSTALADO]" } else { "[NO INSTALADO]" }
+# --------------------------------------------------
+# 7-ZIP
+# --------------------------------------------------
+function Test-7ZipInstalled {
+    return Test-PathSafe "C:\Program Files\7-Zip\7z.exe"
+}
+
+# --------------------------------------------------
+# NVIDIA APP
+# --------------------------------------------------
+function Test-NvidiaAppInstalled {
+
+    $paths = @(
+        "C:\Program Files\NVIDIA Corporation\NVIDIA App\NVIDIA App.exe",
+        "C:\Program Files\NVIDIA Corporation\NVIDIA GeForce Experience\NVIDIA GeForce Experience.exe"
+    )
+
+    foreach ($p in $paths) {
+        if (Test-PathSafe $p) { return $true }
+    }
+
+    return $false
+}
+
+# --------------------------------------------------
+# ULTIMAKER CURA
+# --------------------------------------------------
+function Test-UltimakerCuraInstalled {
+
+    $paths = @(
+        "C:\Program Files\UltiMaker Cura\UltiMaker-Cura.exe",
+        "C:\Program Files\Ultimaker Cura\Cura.exe"
+    )
+
+    foreach ($p in $paths) {
+        if (Test-PathSafe $p) { return $true }
+    }
+
+    return $false
 }

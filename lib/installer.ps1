@@ -2,7 +2,10 @@
 # INSTALLER CORE - BLACK CONSOLE
 # ==================================================
 
-# Utilidades visuales
+# -------------------------------
+# UTILIDADES VISUALES
+# -------------------------------
+
 function Write-Info  { param($m) Write-Host "[*] $m" -ForegroundColor Cyan }
 function Write-Ok    { param($m) Write-Host "[OK] $m" -ForegroundColor Green }
 function Write-Skip  { param($m) Write-Host "[SKIP] $m" -ForegroundColor Yellow }
@@ -18,7 +21,7 @@ function Download-File {
     )
 
     Write-Info "Descargando $Url"
-    Invoke-WebRequest $Url -OutFile $OutFile -UseBasicParsing
+    Invoke-WebRequest $Url -OutFile $OutFile
 }
 
 # -------------------------------
@@ -149,4 +152,44 @@ function Install-UltimakerCura {
     Download-File "https://github.com/Ultimaker/Cura/releases/latest/download/UltiMaker-Cura-Windows.exe" $tmp
     Start-Process $tmp -ArgumentList "/S" -Wait
     Write-Ok "Ultimaker Cura instalado."
+}
+
+# ==================================================
+# DESINSTALADORES
+# ==================================================
+
+function Uninstall-BlackConsoleRadial {
+
+    Write-Info "Eliminando Black Console Radial HUD..."
+
+    $skinPath = "$env:USERPROFILE\Documents\Rainmeter\Skins\BlackConsoleRadial"
+
+    if (Test-Path $skinPath) {
+        Remove-Item $skinPath -Recurse -Force
+        Write-Ok "Skin eliminado."
+    } else {
+        Write-Skip "Skin no encontrado."
+    }
+
+    Write-Info "Reiniciando Rainmeter..."
+    Stop-Process -Name Rainmeter -Force -ErrorAction SilentlyContinue
+    Start-Process "C:\Program Files\Rainmeter\Rainmeter.exe" -ErrorAction SilentlyContinue
+
+    Write-Ok "Black Console Radial HUD desinstalado."
+}
+
+function Uninstall-QuickVolumeControl {
+
+    Write-Info "Eliminando control de volumen rapido..."
+
+    $path = "$env:APPDATA\BlackConsole\QuickVolume"
+
+    if (Test-Path $path) {
+        Remove-Item $path -Recurse -Force
+        Write-Ok "Archivos eliminados."
+    } else {
+        Write-Skip "No se encontraron archivos."
+    }
+
+    Write-Ok "Control de volumen rapido eliminado."
 }

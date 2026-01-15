@@ -24,9 +24,11 @@ function Show-Signature {
     Write-Host "Version: $($Global:BlackConsole.Version)"
     Write-Host ""
 
-    $phrase = Get-Random -InputObject $Global:StartupPhrases
-    Write-Host $phrase
-    Write-Host ""
+    if ($Global:StartupPhrases) {
+        $phrase = Get-Random -InputObject $Global:StartupPhrases
+        Write-Host $phrase
+        Write-Host ""
+    }
 }
 
 function Show-Menu {
@@ -51,7 +53,42 @@ function Show-Menu {
     Write-Host ""
 
     Write-Host "OTRAS OPCIONES"
+    Write-Host " [U] Desinstalar software"
     Write-Host " [A] Acerca de Black Console"
     Write-Host " [0] Salir"
     Write-Host ""
+}
+
+# ==================================================
+# HELPERS DE UI / UX
+# ==================================================
+
+function Confirm-Action {
+    param (
+        [string]$Message
+    )
+
+    Write-Host ""
+    $response = Read-Host "$Message (s/n)"
+    return ($response.ToLower() -eq "s")
+}
+
+function Write-Success {
+    param($Message)
+    Write-Host "[OK] $Message" -ForegroundColor Green
+}
+
+function Write-ErrorMessage {
+    param($Message)
+    Write-Host "[ERROR] $Message" -ForegroundColor Red
+}
+
+function Write-WarningMessage {
+    param($Message)
+    Write-Host "[WARN] $Message" -ForegroundColor Yellow
+}
+
+function Pause {
+    Write-Host ""
+    Read-Host "Pulsa ENTER para continuar"
 }
