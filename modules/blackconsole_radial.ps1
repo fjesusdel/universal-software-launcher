@@ -1,31 +1,29 @@
+# ==================================================
+# BLACK CONSOLE RADIAL HUD - INSTALLER
+# ==================================================
+
 function Install-BlackConsoleRadial {
 
-    Clear-Host
-    Write-Host "==========================================" -ForegroundColor Cyan
-    Write-Host "  BLACK CONSOLE :: RADIAL HUD INSTALLER" -ForegroundColor Cyan
-    Write-Host "==========================================" -ForegroundColor Cyan
-    Write-Host ""
+    Write-Host "[*] Instalando Black Console Radial HUD..." -ForegroundColor Cyan
 
-    $BasePath = Split-Path -Parent $PSScriptRoot
-    $Installer = Join-Path $PSScriptRoot "blackconsole_radial\install.ps1"
+    $skinsPath = "$env:USERPROFILE\Documents\Rainmeter\Skins"
+    $target    = Join-Path $skinsPath "BlackConsole"
 
-    if (-not (Test-Path $Installer)) {
-        Write-Host "ERROR: No se encuentra el instalador del Radial HUD" -ForegroundColor Red
-        Write-Host $Installer -ForegroundColor DarkRed
+    if (Test-Path $target) {
+        Write-Host "[SKIP] El radial ya está instalado." -ForegroundColor Yellow
         return
     }
 
-    Write-Host "[*] Iniciando instalacion de Black Console Radial..." -ForegroundColor Yellow
-    Write-Host ""
+    $source = Join-Path $PSScriptRoot "..\assets\radial"
 
-    try {
-        & $Installer
-        Write-Host ""
-        Write-Host "[OK] Black Console Radial instalado correctamente." -ForegroundColor Green
+    if (-not (Test-Path $source)) {
+        Write-Host "[ERROR] No se encuentra el paquete del radial." -ForegroundColor Red
+        return
     }
-    catch {
-        Write-Host ""
-        Write-Host "[ERROR] Fallo durante la instalacion del Radial HUD" -ForegroundColor Red
-        Write-Host $_.Exception.Message -ForegroundColor DarkRed
-    }
+
+    Copy-Item $source $target -Recurse -Force
+
+    Start-Process "Rainmeter.exe"
+
+    Write-Host "[OK] Black Console Radial HUD instalado." -ForegroundColor Green
 }

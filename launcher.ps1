@@ -10,25 +10,39 @@ $Host.UI.RawUI.WindowTitle = "Black Console"
 
 $BasePath = Split-Path -Parent $MyInvocation.MyCommand.Path
 
+# ==================================================
+# CARGA DE MODULOS
+# ==================================================
+
 $modules = @(
+    # CORE
     "$BasePath\lib\config.ps1",
     "$BasePath\lib\ui.ps1",
     "$BasePath\lib\detect.ps1",
     "$BasePath\lib\installer.ps1",
 
-    "$BasePath\modules\hardware_detect.ps1",
+    # INSTALACION
     "$BasePath\modules\manual_install.ps1",
     "$BasePath\modules\batch_install.ps1",
 
+    # HERRAMIENTAS BLACK CONSOLE
+    "$BasePath\modules\blackconsole_radial.ps1",
+    "$BasePath\modules\volume_control.ps1",
+
+    # DESINSTALACION
     "$BasePath\modules\uninstall\status.ps1",
     "$BasePath\modules\uninstall\menu.ps1",
     "$BasePath\modules\uninstall\uninstall_windows_apps.ps1",
 
+    # SISTEMA
+    "$BasePath\modules\hardware_detect.ps1",
     "$BasePath\modules\prechecks.ps1",
     "$BasePath\modules\snapshot.ps1",
     "$BasePath\modules\presets.ps1",
     "$BasePath\modules\prepare_new_pc.ps1",
     "$BasePath\modules\system_diagnostic.ps1",
+
+    # INFO
     "$BasePath\modules\about.ps1"
 )
 
@@ -52,6 +66,10 @@ foreach ($module in $modules) {
 if ($Verbose) {
     $Global:BlackConsole.Verbose = $true
 }
+
+# ==================================================
+# UI PRINCIPAL
+# ==================================================
 
 function Show-MainScreen {
     Clear-Host
